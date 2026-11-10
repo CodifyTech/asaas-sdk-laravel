@@ -6,6 +6,10 @@ O formato segue o [Keep a Changelog 1.1.0](https://keepachangelog.com/pt-BR/1.1.
 
 ## [Unreleased]
 
+### Changed
+
+- Suporte ao Guzzle 8: `guzzlehttp/guzzle` passa de `^7.8` para `^7.8.2|^8.0`. O Laravel 12 continua usando a 7.x.
+
 ### Removed
 
 - Suporte a Laravel 11. O SDK passa a exigir Laravel 12 ou 13 (`illuminate/*` `^12.0|^13.0`, `orchestra/testbench` `^10.0|^11.0` em dev).

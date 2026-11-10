@@ -13,7 +13,7 @@ Versão atual: **1.0.0**.
 
 - PHP `^8.4` (8.4 e 8.5)
 - Laravel 12 ou 13 (`illuminate/http`, `illuminate/support` e `illuminate/validation` `^12.0|^13.0`)
-- `guzzlehttp/guzzle` `^7.8`
+- `guzzlehttp/guzzle` `^7.8.2|^8.0` (o Laravel 12 usa a 7.x)
 
 | Laravel | PHP 8.4 | PHP 8.5 |
 |---------|---------|---------|
