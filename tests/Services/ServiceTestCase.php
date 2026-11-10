@@ -49,7 +49,8 @@ abstract class ServiceTestCase extends TestCase
             && $this->urlWithoutQuery($request) === self::BASE_URL . $path
             && $this->decodeQuery($request) === $this->normalizeQuery($query)
             && $request->hasHeader('Accept', $accept)
-            && ($body === null || $request->data() == $body));
+            // Decode the raw body: Laravel 9.7 Request::data() parses JSON bodies as form data.
+            && ($body === null || json_decode($request->body(), true) == $body));
     }
 
     /** @param list<string> $partNames */
