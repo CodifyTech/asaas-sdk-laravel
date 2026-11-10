@@ -6,6 +6,12 @@ O formato segue o [Keep a Changelog 1.1.0](https://keepachangelog.com/pt-BR/1.1.
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-11-10
+
+### Changed
+
+- O `User-Agent` padrão passa a ser `codifytech-asaas-sdk-laravel/1.0.2`.
+
 ## [1.0.1] - 2026-11-10
 
 ### Changed
@@ -44,6 +50,7 @@ Primeira versão pública.
 - Gerador de código a partir de `tools/endpoint-map.json` e da especificação oficial.
 - Suporte a PHP 8.4 e 8.5 com Laravel 11, 12 e 13.
 
-[Unreleased]: https://github.com/CodifyTech/asaas-sdk-laravel/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/CodifyTech/asaas-sdk-laravel/compare/v1.0.2...HEAD
+[1.0.2]: https://github.com/CodifyTech/asaas-sdk-laravel/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/CodifyTech/asaas-sdk-laravel/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/CodifyTech/asaas-sdk-laravel/releases/tag/v1.0.0

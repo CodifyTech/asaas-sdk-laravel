@@ -8,7 +8,7 @@ use Asaas\Laravel\Environment;
 
 final readonly class AsaasSdkConfig
 {
-    public const string DEFAULT_USER_AGENT = 'codifytech-asaas-sdk-laravel/1.0.1';
+    public const string DEFAULT_USER_AGENT = 'codifytech-asaas-sdk-laravel/1.0.2';
 
     /** Hosts allowed over plain HTTP, for local mock servers only. */
     private const array LOOPBACK_HOSTS = ['localhost', '127.0.0.1', '[::1]', '::1'];

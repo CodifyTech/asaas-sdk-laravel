@@ -7,7 +7,7 @@
 
 SDK Laravel para a [API Asaas v3](https://docs.asaas.com/reference), mantido pela [CodifyTech](https://github.com/CodifyTech). Cobre **213 de 213 endpoints oficiais**, em 34 serviços, sobre o `Http` facade do Laravel. Valida a entrada antes de cada chamada e devolve models de resposta e erros tipados. A API pública trabalha com arrays.
 
-Versão atual: **1.0.1**.
+Versão atual: **1.0.2**.
 
 ## Requisitos
 
@@ -54,7 +54,7 @@ Chaves de `config/asaas.php`:
 | `environment` | `ASAAS_ENV` | `sandbox` | `production` (ou `prod`) ou `sandbox`, sem diferenciar maiúsculas. Qualquer outro valor lança `InvalidArgumentException`. |
 | `base_url` | `ASAAS_BASE_URL` | `null` | URL base opcional. Quando definida, sobrepõe a URL do ambiente. Precisa ser `https://` (veja "Segurança"). |
 | `timeout` | `ASAAS_TIMEOUT` | `10000` | Timeout em **milissegundos**, aplicado a cada tentativa. Mínimo 1. |
-| `user_agent` | `ASAAS_USER_AGENT` | `codifytech-asaas-sdk-laravel/1.0.1` | Valor do header `User-Agent`. |
+| `user_agent` | `ASAAS_USER_AGENT` | `codifytech-asaas-sdk-laravel/1.0.2` | Valor do header `User-Agent`. |
 | `retry.max_retries` | `ASAAS_RETRY_MAX` | `1` | Número de **novas tentativas** depois da primeira, de 0 a 10. `0` desliga o retry; o padrão `1` faz até duas tentativas no total. |
 | `retry.initial_delay` | `ASAAS_RETRY_INITIAL_DELAY` | `150` | Espera, em milissegundos, antes da primeira nova tentativa. |
 | `retry.max_delay` | `ASAAS_RETRY_MAX_DELAY` | `1000` | Teto da espera calculada, em milissegundos (o jitter é somado depois). |
