@@ -3,7 +3,7 @@
     "description": "SDK Laravel para a API Asaas v3: cliente HTTP com retry, serviços tipados, Models e validação de requisições.",
     "type": "library",
     "license": "MIT",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "keywords": [
         "asaas",
         "laravel",

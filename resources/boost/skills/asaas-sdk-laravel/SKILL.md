@@ -23,7 +23,7 @@ ASAAS_RETRY_MAX=1          # retries after the first attempt (0 to 10), 0 = no r
 # ASAAS_BASE_URL=          # overrides the environment URL; must be https:// (http:// only for localhost/127.0.0.1/[::1]); leave unset otherwise
 ```
 
-Keys in `config/asaas.php`: `api_key`, `environment`, `base_url`, `timeout`, `user_agent` (default `codifytech-asaas-sdk-laravel/1.0.0`), `retry.{max_retries,initial_delay,max_delay,backoff_factor,jitter,status_codes,methods}`. The key is sent in the `access_token` header. Real URLs: `https://api-sandbox.asaas.com` and `https://api.asaas.com`.
+Keys in `config/asaas.php`: `api_key`, `environment`, `base_url`, `timeout`, `user_agent` (default `codifytech-asaas-sdk-laravel/1.0.1`), `retry.{max_retries,initial_delay,max_delay,backoff_factor,jitter,status_codes,methods}`. The key is sent in the `access_token` header. Real URLs: `https://api-sandbox.asaas.com` and `https://api.asaas.com`.
 
 ## Access patterns
 
