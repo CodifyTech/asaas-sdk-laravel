@@ -6,6 +6,10 @@ O formato segue o [Keep a Changelog 1.1.0](https://keepachangelog.com/pt-BR/1.1.
 
 ## [Unreleased]
 
+### Removed
+
+- Suporte a Laravel 11. O SDK passa a exigir Laravel 12 ou 13 (`illuminate/*` `^12.0|^13.0`, `orchestra/testbench` `^10.0|^11.0` em dev).
+
 ## [1.0.0] - 2026-11-10
 
 Primeira versão pública.

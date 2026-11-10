@@ -12,16 +12,15 @@ Versão atual: **1.0.0**.
 ## Requisitos
 
 - PHP `^8.4` (8.4 e 8.5)
-- Laravel 11, 12 ou 13 (`illuminate/http`, `illuminate/support` e `illuminate/validation` `^11.0|^12.0|^13.0`)
+- Laravel 12 ou 13 (`illuminate/http`, `illuminate/support` e `illuminate/validation` `^12.0|^13.0`)
 - `guzzlehttp/guzzle` `^7.8`
 
 | Laravel | PHP 8.4 | PHP 8.5 |
 |---------|---------|---------|
-| 11 | sim | não |
 | 12 | sim | sim |
 | 13 | sim | sim |
 
-Todas as combinações marcadas rodam na CI. O suporte de segurança do Laravel 11 terminou em março de 2026: prefira Laravel 12 ou 13.
+Todas as combinações rodam na CI. Laravel 11 não é suportado.
 
 ## Instalação
 
@@ -455,7 +454,7 @@ composer ci
 | `composer generate:check` | Falha se algum arquivo gerado divergir do mapa. |
 | `composer ci` | Roda `format:check`, `analyse`, `generate:check` e `test`, nessa ordem. |
 
-Todo arquivo PHP começa com `declare(strict_types=1);`. A CI, no GitHub Actions, roda a suíte em PHP 8.4 e 8.5 com Laravel 11, 12 e 13, nos modos `prefer-lowest` e `prefer-stable`, além de `composer audit`.
+Todo arquivo PHP começa com `declare(strict_types=1);`. A CI, no GitHub Actions, roda a suíte em PHP 8.4 e 8.5 com Laravel 12 e 13, nos modos `prefer-lowest` e `prefer-stable`, além de `composer audit`.
 
 O código de `src/Services`, `src/Http/Requests/*`, parte dos models, `tests/Services` e `docs/services` é gerado. **Não edite esses arquivos à mão**: altere `tools/endpoint-map.json` e regenere.
 

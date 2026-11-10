@@ -5,7 +5,7 @@ description: Use when integrating Asaas payments in a Laravel app with codifytec
 
 # asaas-sdk-laravel
 
-PHP SDK for Asaas API v3 on top of Laravel's `Http` facade, by CodifyTech. 213 endpoints in 34 services, each one a readonly property of `Asaas\Laravel\AsaasSdk`. Requires PHP ^8.4 and Laravel 11, 12 or 13. It only works inside a booted Laravel app (needs the `Http` and `Validator` facades).
+PHP SDK for Asaas API v3 on top of Laravel's `Http` facade, by CodifyTech. 213 endpoints in 34 services, each one a readonly property of `Asaas\Laravel\AsaasSdk`. Requires PHP ^8.4 and Laravel 12 or 13. It only works inside a booted Laravel app (needs the `Http` and `Validator` facades).
 
 The code is the source of truth: before using a method, confirm its name and signature in `src/Services/{Name}Service.php` and its rules in `src/Http/Requests/{Service}/`. Never invent a method; if it is not there, say so.
 
