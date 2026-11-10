@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AsaasTools;
 
 /** Read-only view over the OpenAPI snapshot (tools/asaas-openapi.json). */
@@ -29,6 +31,7 @@ final class Spec
             }
             $schema = $this->data['components']['schemas'][$name];
         }
+
         return $schema;
     }
 
@@ -45,10 +48,11 @@ final class Spec
         foreach ($this->data['paths'] as $path => $items) {
             foreach ($items as $verb => $unused) {
                 if (in_array($verb, self::VERBS, true)) {
-                    $keys[] = strtoupper($verb) . ' ' . $path;
+                    $keys[] = strtoupper($verb).' '.$path;
                 }
             }
         }
+
         return $keys;
     }
 
@@ -57,6 +61,7 @@ final class Spec
     {
         $content = $op['requestBody']['content'] ?? [];
         $type = array_key_first($content);
+
         return $type === null ? [null, []] : [$type, $this->resolve($content[$type]['schema'] ?? [])];
     }
 
@@ -75,6 +80,7 @@ final class Spec
                 $names[] = $param['name'];
             }
         }
+
         return $names;
     }
 
@@ -86,6 +92,7 @@ final class Spec
                 return $response['content'] ?? [];
             }
         }
+
         return [];
     }
 
@@ -94,6 +101,7 @@ final class Spec
     {
         $schema = $this->resolve($this->successContent($op)['application/json']['schema'] ?? []);
         $props = $schema['properties'] ?? [];
+
         return isset($props['data']) && ($this->resolve($props['data'])['type'] ?? null) === 'array'
             && (isset($props['hasMore']) || isset($props['totalCount']));
     }
@@ -102,6 +110,7 @@ final class Spec
     public static function example(array $schema): mixed
     {
         $example = $schema['example'] ?? null;
+
         return is_scalar($example) ? $example : null;
     }
 }

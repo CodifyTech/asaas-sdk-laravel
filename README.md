@@ -1,28 +1,32 @@
-# Asaas API SDK Laravel
+# Asaas SDK Laravel
 
-SDK Laravel para a [API Asaas v3](https://docs.asaas.com/reference): cobertura de **213 de 213 endpoints oficiais**, em 34 serviços, sobre o `Http` facade do Laravel. Validação de entrada antes de cada chamada, models de resposta e erros tipados. A API pública trabalha com arrays.
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/codifytech/asaas-sdk-laravel.svg)](https://packagist.org/packages/codifytech/asaas-sdk-laravel)
+[![Total Downloads](https://img.shields.io/packagist/dt/codifytech/asaas-sdk-laravel.svg)](https://packagist.org/packages/codifytech/asaas-sdk-laravel)
+[![Tests](https://github.com/CodifyTech/asaas-sdk-laravel/actions/workflows/tests.yml/badge.svg)](https://github.com/CodifyTech/asaas-sdk-laravel/actions/workflows/tests.yml)
+[![License](https://img.shields.io/packagist/l/codifytech/asaas-sdk-laravel.svg)](LICENSE)
 
-Versão atual: **2.0.0**. Vindo da 1.x? Leia o [UPGRADE.md](UPGRADE.md).
+SDK Laravel para a [API Asaas v3](https://docs.asaas.com/reference), mantido pela [CodifyTech](https://github.com/CodifyTech). Cobre **213 de 213 endpoints oficiais**, em 34 serviços, sobre o `Http` facade do Laravel. Valida a entrada antes de cada chamada e devolve models de resposta e erros tipados. A API pública trabalha com arrays.
 
-## Compatibilidade
+Versão atual: **1.0.0**.
 
-| Laravel | PHP suportado | PHP oficial do Laravel |
-|---------|---------------|------------------------|
-| 9 (>= 9.7) | 8.1 a 8.5 | 8.0 a 8.2 |
-| 10 | 8.1 a 8.5 | 8.1 a 8.3 |
-| 11 | 8.2 a 8.5 | 8.2 a 8.4 |
-| 12 | 8.2 a 8.5 | 8.2 a 8.5 |
-| 13 | 8.3 a 8.5 | 8.3 a 8.5 |
+## Requisitos
 
-- As combinações fora da faixa oficial de PHP do Laravel são cobertas pela nossa CI, mas não são suportadas pelo próprio Laravel.
-- Laravel 9, 10 e 11 não recebem mais correções de segurança do Laravel. O Composer 2.9 bloqueia essas versões por padrão; para instalar, defina `COMPOSER_NO_SECURITY_BLOCKING=1`.
-- O pacote exige `guzzlehttp/guzzle` `^7.2`. O Laravel 9 e o 10 apenas sugerem o Guzzle, então ele é instalado junto com o SDK.
-- O mínimo de Laravel 9.7 existe porque as versões 9.x anteriores não fazem retry de respostas com falha (veja "Retry e timeout").
+- PHP `^8.4` (8.4 e 8.5)
+- Laravel 11, 12 ou 13 (`illuminate/http`, `illuminate/support` e `illuminate/validation` `^11.0|^12.0|^13.0`)
+- `guzzlehttp/guzzle` `^7.8`
+
+| Laravel | PHP 8.4 | PHP 8.5 |
+|---------|---------|---------|
+| 11 | sim | não |
+| 12 | sim | sim |
+| 13 | sim | sim |
+
+Todas as combinações marcadas rodam na CI. O suporte de segurança do Laravel 11 terminou em março de 2026: prefira Laravel 12 ou 13.
 
 ## Instalação
 
 ```bash
-composer require luquinhasbrito/asaas-api-sdk-laravel
+composer require codifytech/asaas-sdk-laravel
 ```
 
 O pacote registra `Asaas\Laravel\AsaasServiceProvider` pelo package auto-discovery, e o helper global `asaas()` é carregado automaticamente. O provider faz `mergeConfigFrom`, então **publicar a configuração é opcional**: basta definir as variáveis no `.env`. Publique apenas se quiser editar chaves que não têm variável de ambiente (como `retry.methods`):
@@ -48,15 +52,15 @@ Chaves de `config/asaas.php`:
 | Chave | Variável de ambiente | Padrão | Descrição |
 |-------|----------------------|--------|-----------|
 | `api_key` | `ASAAS_API_KEY` | `''` | Chave de API enviada no header de autenticação. Se vazia, nenhum header de autenticação é enviado. |
-| `environment` | `ASAAS_ENV` | `sandbox` | `production` ou `prod` seleciona produção; **qualquer outro valor** seleciona sandbox, inclusive grafias erradas como `producao`. |
-| `base_url` | `ASAAS_BASE_URL` | `null` | URL base opcional. Quando definida, sobrepõe a URL do ambiente. |
-| `timeout` | `ASAAS_TIMEOUT` | `10000` | Timeout em **milissegundos**, aplicado a cada tentativa. |
-| `user_agent` | `ASAAS_USER_AGENT` | `asaas-api-sdk-laravel/1.0` | Valor do header `User-Agent`. |
-| `retry.max_retries` | `ASAAS_RETRY_MAX` | `1` | Número **total de tentativas**, incluindo a primeira. O padrão `1` significa nenhum retry. |
-| `retry.initial_delay` | `ASAAS_RETRY_INITIAL_DELAY` | `150` | Espera fixa, em milissegundos, entre tentativas. |
-| `retry.max_delay` | `ASAAS_RETRY_MAX_DELAY` | `1000` | Lido, mas ignorado pelo cliente HTTP. |
-| `retry.backoff_factor` | `ASAAS_RETRY_BACKOFF_FACTOR` | `2` | Lido, mas ignorado pelo cliente HTTP. |
-| `retry.jitter` | `ASAAS_RETRY_JITTER` | `150` | Lido, mas ignorado pelo cliente HTTP. |
+| `environment` | `ASAAS_ENV` | `sandbox` | `production` (ou `prod`) ou `sandbox`, sem diferenciar maiúsculas. Qualquer outro valor lança `InvalidArgumentException`. |
+| `base_url` | `ASAAS_BASE_URL` | `null` | URL base opcional. Quando definida, sobrepõe a URL do ambiente. Precisa ser `https://` (veja "Segurança"). |
+| `timeout` | `ASAAS_TIMEOUT` | `10000` | Timeout em **milissegundos**, aplicado a cada tentativa. Mínimo 1. |
+| `user_agent` | `ASAAS_USER_AGENT` | `codifytech-asaas-sdk-laravel/1.0.0` | Valor do header `User-Agent`. |
+| `retry.max_retries` | `ASAAS_RETRY_MAX` | `1` | Número de **novas tentativas** depois da primeira, de 0 a 10. `0` desliga o retry; o padrão `1` faz até duas tentativas no total. |
+| `retry.initial_delay` | `ASAAS_RETRY_INITIAL_DELAY` | `150` | Espera, em milissegundos, antes da primeira nova tentativa. |
+| `retry.max_delay` | `ASAAS_RETRY_MAX_DELAY` | `1000` | Teto da espera calculada, em milissegundos (o jitter é somado depois). |
+| `retry.backoff_factor` | `ASAAS_RETRY_BACKOFF_FACTOR` | `2` | Multiplicador da espera a cada nova tentativa. |
+| `retry.jitter` | `ASAAS_RETRY_JITTER` | `150` | Máximo, em milissegundos, do acréscimo aleatório somado a cada espera. |
 | `retry.status_codes` | sem variável | `[408, 429, 500, 502, 503, 504]` | Status HTTP que disparam nova tentativa. |
 | `retry.methods` | sem variável | `['GET', 'PUT', 'DELETE']` | Métodos elegíveis para nova tentativa, em maiúsculas. `POST` não está na lista de propósito (veja "Retry e timeout"). |
 | `api_key_header` | sem variável | `access_token` | Opcional. Nome do header da API key. Não consta no arquivo publicado: para alterá-lo, adicione a chave ao seu `config/asaas.php`. |
@@ -64,9 +68,13 @@ Chaves de `config/asaas.php`:
 | Ambiente | URL base |
 |----------|----------|
 | `production` / `prod` | `https://api.asaas.com` |
-| qualquer outro valor | `https://api-sandbox.asaas.com` |
+| `sandbox` (padrão) | `https://api-sandbox.asaas.com` |
 
-`base_url` sobrepõe as duas URLs. Mantenha `ASAAS_BASE_URL` ausente ou comentada quando não precisar dela: `ASAAS_BASE_URL=` em branco resulta em string vazia e também sobrepõe o ambiente.
+Um `ASAAS_ENV` com erro de digitação (por exemplo `producao`) falha na construção do SDK, em vez de cair no sandbox sem aviso. Ausente ou vazio, vale `sandbox`.
+
+`base_url` sobrepõe as duas URLs. Vazio equivale a ausente. A URL precisa ser `https://`, sem usuário, senha, query ou fragmento.
+
+Valores inválidos de `timeout` ou `retry.*` (negativos, `max_retries` acima de 10, `backoff_factor` menor que 1) também lançam `InvalidArgumentException`.
 
 A API key vai no header `access_token`. O SDK também envia `Accept: application/json` (nos endpoints de PDF, `application/pdf, application/json`) e o `User-Agent` configurado.
 
@@ -287,7 +295,7 @@ Antes de qualquer chamada HTTP, o SDK valida a entrada com o `Validator` do Lara
 
 - **Corpo**: campos obrigatórios do schema oficial são exigidos e tipos/enums são checados. Campos desconhecidos **são enviados** como estão, para que campos novos da API funcionem antes de uma atualização do SDK.
 - **Query**: estrita. Chaves sem regra são rejeitadas (mensagem do erro: `O parâmetro de consulta "x" não é suportado.`).
-- **Rota**: os parâmetros de rota são codificados com `rawurlencode`, não validados.
+- **Rota**: os parâmetros de rota (ids) são codificados com `rawurlencode`. Valores vazios, `.` ou `..` lançam `InvalidArgumentException` antes da requisição.
 - **Booleanos** em query viram `true`/`false`.
 
 ```php
@@ -304,7 +312,9 @@ try {
 
 | Situação | Exceção | Detalhes |
 |----------|---------|----------|
+| Configuração inválida | `InvalidArgumentException` | `ASAAS_ENV` desconhecido ou `base_url` sem `https://`. Lançada ao construir o SDK. |
 | Entrada inválida | `Illuminate\Validation\ValidationException` | Lançada antes da chamada HTTP. |
+| Parâmetro de rota inválido | `InvalidArgumentException` | Id vazio, `.` ou `..`. Lançada antes da chamada HTTP. |
 | HTTP 400 | `Asaas\Laravel\Exceptions\ErrorResponseDtoException` | `getErrors()` retorna `errors` da resposta; `errorResponse` guarda o corpo decodificado. |
 | Qualquer outro status não 2xx | `Asaas\Laravel\Exceptions\ApiError` | `statusCode` e `response` (`Illuminate\Http\Client\Response`). |
 | Falha de rede ou timeout | `Illuminate\Http\Client\ConnectionException` | Não é convertida em `ApiError`. |
@@ -334,12 +344,13 @@ try {
 
 ## Retry e timeout
 
-O SDK repassa `retry.max_retries` e `retry.initial_delay` para o `PendingRequest::retry()` do Laravel:
+O retry usa backoff exponencial com jitter:
 
-- `max_retries` é o total de tentativas, incluindo a primeira. Com `1` não há retry; com `3`, são até duas novas tentativas.
-- A espera é fixa (`initial_delay` ms), sem backoff exponencial e sem considerar `Retry-After`.
+- `max_retries` é o número de novas tentativas depois da primeira. Com `0` não há retry; com o padrão `1`, um `GET` que falha com 503 é tentado mais uma vez; com `3`, são até quatro tentativas no total.
+- A espera antes da nova tentativa `n` (a primeira nova tentativa é `n = 1`) é `min(initial_delay × backoff_factor^(n-1), max_delay)` mais um valor aleatório entre 0 e `jitter` ms. Com os padrões: cerca de 150, 300, 600, 1000, 1000 ms, cada uma com até 150 ms a mais.
+- Se a resposta trouxer `Retry-After` em segundos, a espera é pelo menos esse valor, limitada a `max_delay`.
 - Respostas com erro só são repetidas quando o status está em `retry.status_codes` **e** o método está em `retry.methods`. Falhas de conexão (timeout, DNS, TLS) são repetidas para os métodos elegíveis.
-- O `timeout` vale por tentativa: o tempo máximo é aproximadamente `timeout * max_retries` mais as esperas.
+- O `timeout` vale por tentativa: o tempo máximo é aproximadamente `timeout * (max_retries + 1)` mais as esperas.
 - Ao esgotar as tentativas, a última resposta é mapeada normalmente (`ApiError` ou `ErrorResponseDtoException`); falha de conexão lança `ConnectionException`.
 
 **`POST` não é repetido por padrão** (os métodos elegíveis são `GET`, `PUT` e `DELETE`). Um `POST` repetido após um erro 5xx ou timeout pode duplicar cobranças ou transferências, porque o SDK não envia chave de idempotência. Para habilitar por sua conta e risco, publique a configuração e edite `retry.methods`:
@@ -353,6 +364,28 @@ O SDK repassa `retry.max_retries` e `retry.initial_delay` para o `PendingRequest
 ```
 
 > **Atenção:** só habilite `POST` se você deduplica no seu lado (por exemplo com `externalReference` único e consulta prévia). Nunca para criação de cobranças, transferências ou pagamentos sem essa proteção.
+
+## Segurança
+
+O que o SDK garante:
+
+- **`base_url` só com HTTPS.** Um `base_url` com `http://` lança `InvalidArgumentException` na construção do SDK, porque a API key viajaria em texto puro. A única exceção são hosts de loopback (`localhost`, `127.0.0.1`, `[::1]`), para servidores mock locais.
+- **Ambiente explícito.** `ASAAS_ENV` aceita apenas `production` (ou `prod`) e `sandbox`. Um valor desconhecido lança `InvalidArgumentException` em vez de cair em outro ambiente sem aviso.
+- **Parâmetros de rota seguros.** Ids vazios, `.` ou `..` lançam `InvalidArgumentException` antes da requisição, o que impede path traversal para outros endpoints. Os demais valores são codificados com `rawurlencode`.
+- **API key oculta.** O parâmetro da chave é marcado com `#[\SensitiveParameter]`, então ela não aparece em stack traces. Em `var_dump`, `print_r` e saídas de debug dos objetos de configuração, ela aparece como `***`.
+- **Sem redirecionamentos.** O cliente HTTP não segue redirects, então a API key não é reenviada para outro host. Os headers de autenticação e `User-Agent` são sempre os da configuração.
+- **Query estrita.** Filtros desconhecidos lançam `ValidationException`, em vez de a Asaas ignorá-los e devolver a lista inteira.
+- **Sem retry de `POST` por padrão**, para não duplicar cobranças ou transferências.
+
+O que fica com a sua aplicação:
+
+- Nunca registre em log, exiba ou versione a API key, os dados do cartão (`number`, `ccv`) ou o `creditCardToken`. Não registre corpos completos de requisição.
+- Guarde a API key só no `.env` ou num cofre de segredos. Chaves de subcontas devem ser guardadas criptografadas (`encrypt()`).
+- Use uma chave de sandbox em desenvolvimento e uma chave diferente em produção.
+- Envie `externalReference` único e consulte antes de recriar após timeout ou `ConnectionException`.
+- Valide o header `asaas-access-token` dos webhooks com `hash_equals` (veja o [playbook](docs/ai-playbook.md)).
+
+Para reportar uma vulnerabilidade, siga o [SECURITY.md](SECURITY.md). Não abra issue pública.
 
 ## Testando sua aplicação
 
@@ -409,8 +442,20 @@ O pacote traz uma skill para agentes de IA em [`resources/boost/skills/asaas-sdk
 
 ```bash
 composer install
-vendor/bin/phpunit
+composer ci
 ```
+
+| Script | O que faz |
+|--------|-----------|
+| `composer test` | Roda a suíte do PHPUnit. |
+| `composer analyse` | Análise estática com PHPStan e Larastan. |
+| `composer format` | Formata o código com Laravel Pint. |
+| `composer format:check` | Verifica a formatação sem alterar arquivos. |
+| `composer generate` | Regenera os arquivos gerados a partir do mapa de endpoints. |
+| `composer generate:check` | Falha se algum arquivo gerado divergir do mapa. |
+| `composer ci` | Roda `format:check`, `analyse`, `generate:check` e `test`, nessa ordem. |
+
+Todo arquivo PHP começa com `declare(strict_types=1);`. A CI, no GitHub Actions, roda a suíte em PHP 8.4 e 8.5 com Laravel 11, 12 e 13, nos modos `prefer-lowest` e `prefer-stable`, além de `composer audit`.
 
 O código de `src/Services`, `src/Http/Requests/*`, parte dos models, `tests/Services` e `docs/services` é gerado. **Não edite esses arquivos à mão**: altere `tools/endpoint-map.json` e regenere.
 
@@ -427,10 +472,10 @@ php tools/sync-spec.php
 
 O script baixa as páginas de [docs.asaas.com](https://docs.asaas.com), atualiza `tools/asaas-openapi.json` e `tools/doc-pages.json` e informa o que mudou em relação ao mapa. Depois, edite `tools/endpoint-map.json` para operações novas ou removidas e rode `composer generate`.
 
-## Migração da 1.x
+## Contribuindo
 
-A 2.0.0 tem mudanças incompatíveis (métodos removidos, assinaturas, filtros e retry). Veja o [UPGRADE.md](UPGRADE.md).
+Veja o [CONTRIBUTING.md](CONTRIBUTING.md). As mudanças de cada versão estão no [CHANGELOG.md](CHANGELOG.md). Vulnerabilidades devem ser reportadas em privado, conforme o [SECURITY.md](SECURITY.md).
 
 ## Licença
 
-MIT.
+MIT. Copyright (c) CodifyTech. Veja o [LICENSE](LICENSE).

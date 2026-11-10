@@ -1,13 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AsaasTools;
 
 /** Emits the named new models (item = id + data, list = items + totalCount + hasMore), same shape as Customer/CustomerList. */
 final class ModelEmitter
 {
-    public function __construct(private Plan $plan)
-    {
-    }
+    public function __construct(private Plan $plan) {}
 
     /** @param list<string> $services models used by these services @return array<string, string> */
     public function emit(array $services): array
@@ -20,11 +20,12 @@ final class ModelEmitter
         }
         $files = [];
         foreach (MapValidator::GENERATED_MODELS as $item) {
-            if (isset($used[$item]) || isset($used[$item . 'List'])) {
+            if (isset($used[$item]) || isset($used[$item.'List'])) {
                 $files["src/Models/$item.php"] = $this->item($item);
                 $files["src/Models/{$item}List.php"] = $this->list($item);
             }
         }
+
         return $files;
     }
 
@@ -32,11 +33,16 @@ final class ModelEmitter
     {
         return Php::file([
             ...$this->head(),
-            "/** Raw `{$name}` payload from the Asaas API. */",
+            '/**',
+            " * Raw `{$name}` payload from the Asaas API.",
+            ' *',
+            ' * @implements Arrayable<string, mixed>',
+            ' */',
             "final class $name implements Arrayable",
             '{',
             '    public function __construct(',
             '        public readonly ?string $id = null,',
+            '        /** @var array<string, mixed> */',
             '        public readonly array $data = [],',
             '    ) {',
             '    }',
@@ -44,9 +50,10 @@ final class ModelEmitter
             '    /** @param array<string, mixed> $data */',
             '    public static function fromArray(array $data): self',
             '    {',
-            "        return new self(id: isset(\$data['id']) ? (string) \$data['id'] : null, data: \$data);",
+            "        return new self(id: Cast::string(\$data['id'] ?? null), data: \$data);",
             '    }',
             '',
+            '    /** @return array<string, mixed> */',
             '    public function toArray(): array',
             '    {',
             "        return array_merge(\$this->data, array_filter(['id' => \$this->id], fn (\$v) => \$v !== null));",
@@ -57,10 +64,15 @@ final class ModelEmitter
 
     private function list(string $item): string
     {
-        $key = $this->listKey($item . 'List');
+        $key = $this->listKey($item.'List');
+
         return Php::file([
             ...$this->head(),
-            "/** Paginated list of `{$item}` (API Asaas). */",
+            '/**',
+            " * Paginated list of `{$item}` (API Asaas).",
+            ' *',
+            ' * @implements Arrayable<string, mixed>',
+            ' */',
             "final class {$item}List implements Arrayable",
             '{',
             "    /** @param list<$item> \$items */",
@@ -81,11 +93,12 @@ final class ModelEmitter
             '        }',
             '        return new self(',
             '            items: $items,',
-            "            totalCount: isset(\$data['totalCount']) ? (int) \$data['totalCount'] : null,",
-            "            hasMore: \$data['hasMore'] ?? null,",
+            "            totalCount: Cast::int(\$data['totalCount'] ?? null),",
+            "            hasMore: Cast::bool(\$data['hasMore'] ?? null),",
             '        );',
             '    }',
             '',
+            '    /** @return array<string, mixed> */',
             '    public function toArray(): array',
             '    {',
             '        return [',

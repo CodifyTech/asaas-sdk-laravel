@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AsaasTools;
 
 /**
- * Maps OpenAPI schemas to Laravel validation rules (plans/full-coverage.md section 5).
+ * Maps OpenAPI schemas to Laravel validation rules.
  *
  * A field is ['key', 'rules' (strings or Raw), 'required' (yes|with|no), 'type', 'description', 'enum', 'format'].
  */
@@ -11,21 +13,20 @@ final class RulesBuilder
 {
     private const MAX_DEPTH = 3;
 
-    public function __construct(private Spec $spec)
-    {
-    }
+    public function __construct(private Spec $spec) {}
 
     /** @param array<string, mixed> $schema resolved object schema @return list<array<string, mixed>> */
     public function forBody(array $schema): array
     {
         $fields = [];
         $this->walk($schema, '', 1, 'required', $fields);
+
         return $fields;
     }
 
     /**
-     * @param list<array<string, mixed>> $params
-     * @param bool $paginated adds offset/limit when the page does not declare them (paginated responses)
+     * @param  list<array<string, mixed>>  $params
+     * @param  bool  $paginated  adds offset/limit when the page does not declare them (paginated responses)
      * @return list<array<string, mixed>>
      */
     public function forQuery(array $params, bool $paginated = false): array
@@ -48,6 +49,7 @@ final class RulesBuilder
             $required = (bool) ($param['required'] ?? false);
             $fields[] = $this->paginationBounds($this->field($param['name'], $param['schema'] ?? [], $required ? 'required' : 'nullable', $param['description'] ?? ''));
         }
+
         return $fields;
     }
 
@@ -55,7 +57,7 @@ final class RulesBuilder
      * Pagination contract (https://docs.asaas.com/reference/listagem-e-paginacao): offset starts at 0, limit is 1 to 100.
      * The per-operation specs omit the minimums, so they are applied to every offset/limit query parameter.
      *
-     * @param array<string, mixed> $field
+     * @param  array<string, mixed>  $field
      * @return array<string, mixed>
      */
     private function paginationBounds(array $field): array
@@ -66,6 +68,7 @@ final class RulesBuilder
         }
         $kept = array_filter($field['rules'], fn ($r) => ! (is_string($r) && (str_starts_with($r, 'min:') || str_starts_with($r, 'max:'))));
         $field['rules'] = [...$kept, ...$bounds[$field['key']]];
+
         return $field;
     }
 
@@ -75,8 +78,9 @@ final class RulesBuilder
         $lines = [];
         foreach ($fields as $field) {
             $rules = array_map(fn ($r) => Php::export($r), $field['rules']);
-            $lines[] = '            ' . Php::export($field['key']) . ' => [' . implode(', ', $rules) . '],';
+            $lines[] = '            '.Php::export($field['key']).' => ['.implode(', ', $rules).'],';
         }
+
         return implode("\n", $lines);
     }
 
@@ -87,7 +91,7 @@ final class RulesBuilder
         // Official text: when creditCardToken is sent, creditCard and creditCardHolderInfo are not required.
         $tokenAlternative = $prefix === '' && isset($schema['properties']['creditCardToken']);
         foreach ($schema['properties'] ?? [] as $name => $prop) {
-            $key = $prefix . $name;
+            $key = $prefix.$name;
             $rule = in_array($name, $required, true) ? $requiredRule : 'nullable';
             if ($tokenAlternative && in_array($name, ['creditCard', 'creditCardHolderInfo'], true) && $rule === 'required') {
                 $rule = 'required_without:creditCardToken';
@@ -98,7 +102,7 @@ final class RulesBuilder
                 continue;
             }
             if ($this->kind($resolved) === 'object') {
-                $this->walk($resolved, $key . '.', $level + 1, 'required_with:' . $key, $out);
+                $this->walk($resolved, $key.'.', $level + 1, 'required_with:'.$key, $out);
             } elseif ($this->kind($resolved) === 'array') {
                 $this->walkItems($resolved, $key, $level, $out);
             }
@@ -110,9 +114,9 @@ final class RulesBuilder
     {
         $items = $this->spec->resolve($array['items'] ?? []);
         if ($this->kind($items) === 'object') {
-            $this->walk($items, $key . '.*.', $level + 1, 'required', $out);
+            $this->walk($items, $key.'.*.', $level + 1, 'required', $out);
         } elseif ($items !== []) {
-            $out[] = $this->field($key . '.*', $items, null, '');
+            $out[] = $this->field($key.'.*', $items, null, '');
         }
     }
 
@@ -140,11 +144,11 @@ final class RulesBuilder
                     throw new \RuntimeException("Enum value with a comma at $key: $value");
                 }
             }
-            $rules[] = 'in:' . implode(',', $values);
+            $rules[] = 'in:'.implode(',', $values);
         }
         foreach (['minLength' => 'min', 'minimum' => 'min', 'maxLength' => 'max', 'maximum' => 'max'] as $keyword => $rule) {
             if (isset($resolved[$keyword])) {
-                $rules[] = $rule . ':' . $resolved[$keyword];
+                $rules[] = $rule.':'.$resolved[$keyword];
             }
         }
 
@@ -171,6 +175,7 @@ final class RulesBuilder
         if ($type === null) {
             return isset($schema['properties']) ? 'object' : (isset($schema['items']) ? 'array' : 'string');
         }
+
         return (string) $type;
     }
 }

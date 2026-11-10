@@ -1,13 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AsaasTools;
 
 /** A PHP expression emitted verbatim by Php::export(). */
 final class Raw
 {
-    public function __construct(public readonly string $code)
-    {
-    }
+    public function __construct(public readonly string $code) {}
 }
 
 /** Small helpers shared by the emitters. */
@@ -24,12 +24,13 @@ final class Php
             $isList = array_is_list($value);
             $parts = [];
             foreach ($value as $key => $item) {
-                $parts[] = ($isList ? '' : self::export($key) . ' => ') . self::export($item);
+                $parts[] = ($isList ? '' : self::export($key).' => ').self::export($item);
             }
-            return '[' . implode(', ', $parts) . ']';
+
+            return '['.implode(', ', $parts).']';
         }
         if (is_string($value)) {
-            return "'" . str_replace(['\\', "'"], ['\\\\', "\\'"], $value) . "'";
+            return "'".str_replace(['\\', "'"], ['\\\\', "\\'"], $value)."'";
         }
         if (is_bool($value)) {
             return $value ? 'true' : 'false';
@@ -39,8 +40,10 @@ final class Php
         }
         if (is_float($value)) {
             $text = var_export($value, true);
-            return str_contains($text, '.') || str_contains($text, 'E') ? $text : $text . '.0';
+
+            return str_contains($text, '.') || str_contains($text, 'E') ? $text : $text.'.0';
         }
+
         return (string) $value;
     }
 
@@ -52,17 +55,18 @@ final class Php
     public static function shortName(string $fqcn): string
     {
         $pos = strrpos($fqcn, '\\');
+
         return $pos === false ? $fqcn : substr($fqcn, $pos + 1);
     }
 
     /** @param list<string> $lines */
     public static function file(array $lines): string
     {
-        return implode("\n", $lines) . "\n";
+        return implode("\n", $lines)."\n";
     }
 
     public static function phpHeader(): array
     {
-        return ['<?php', '', '// ' . self::HEADER, ''];
+        return ['<?php', '', 'declare(strict_types=1);', '', '// '.self::HEADER, ''];
     }
 }

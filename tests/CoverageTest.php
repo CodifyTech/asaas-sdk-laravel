@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Asaas\Laravel\Tests;
 
 use Asaas\Laravel\AsaasSdk;
@@ -14,7 +16,7 @@ class CoverageTest extends TestCase
     /** @return list<array<string, mixed>> */
     private function map(): array
     {
-        $map = json_decode((string) file_get_contents(__DIR__ . '/../tools/endpoint-map.json'), true);
+        $map = json_decode((string) file_get_contents(__DIR__.'/../tools/endpoint-map.json'), true);
         $this->assertIsArray($map);
 
         return $map;
@@ -22,7 +24,7 @@ class CoverageTest extends TestCase
 
     public function test_map_covers_all_official_operations(): void
     {
-        $keys = array_map(fn (array $e) => $e['method'] . ' ' . $e['path'], $this->map());
+        $keys = array_map(fn (array $e) => $e['method'].' '.$e['path'], $this->map());
 
         $this->assertCount(213, $keys);
         $this->assertCount(213, array_unique($keys));
@@ -34,7 +36,7 @@ class CoverageTest extends TestCase
         $failures = [];
 
         foreach ($this->map() as $entry) {
-            $label = $entry['service'] . '::' . $entry['sdkMethod'];
+            $label = $entry['service'].'::'.$entry['sdkMethod'];
             $failure = $this->signatureFailure($sdk, $entry);
             if ($failure !== null) {
                 $failures[] = "$label: $failure";
@@ -47,7 +49,7 @@ class CoverageTest extends TestCase
     /** @param array<string, mixed> $entry */
     private function signatureFailure(ReflectionClass $sdk, array $entry): ?string
     {
-        $serviceClass = 'Asaas\\Laravel\\Services\\' . $entry['service'];
+        $serviceClass = 'Asaas\\Laravel\\Services\\'.$entry['service'];
         if (! $sdk->hasProperty($entry['property'])) {
             return "AsaasSdk has no property {$entry['property']}";
         }
@@ -69,7 +71,7 @@ class CoverageTest extends TestCase
 
         $expectedReturn = in_array($entry['responseModel'], ['string', 'void'], true)
             ? $entry['responseModel']
-            : 'Asaas\\Laravel\\Models\\' . $entry['responseModel'];
+            : 'Asaas\\Laravel\\Models\\'.$entry['responseModel'];
         $returnType = $method->getReturnType();
         $actualReturn = $returnType instanceof ReflectionNamedType ? $returnType->getName() : (string) $returnType;
 

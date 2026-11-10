@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AsaasTools;
 
 /** Emits tests/Services/<Service>Test.php (see tests/Services/ServiceTestCase.php for the assertions). */
@@ -7,9 +9,7 @@ final class TestEmitter
 {
     private const PDF_SAMPLE = '%PDF-1.4 sample';
 
-    public function __construct(private Plan $plan)
-    {
-    }
+    public function __construct(private Plan $plan) {}
 
     /** @param list<string> $services @return array<string, string> */
     public function emit(array $services): array
@@ -18,6 +18,7 @@ final class TestEmitter
         foreach ($services as $service) {
             $files["tests/Services/{$service}Test.php"] = $this->render($service);
         }
+
         return $files;
     }
 
@@ -28,7 +29,7 @@ final class TestEmitter
         foreach ($this->plan->services[$service] as $i) {
             $entry = $this->plan->entries[$i];
             if (! in_array($entry['responseModel'], ['string', 'void'], true)) {
-                $imports[] = 'Asaas\\Laravel\\Models\\' . $entry['responseModel'];
+                $imports[] = 'Asaas\\Laravel\\Models\\'.$entry['responseModel'];
             }
             if ($entry['multipart']) {
                 $imports[] = 'Illuminate\\Http\\UploadedFile';
@@ -53,6 +54,7 @@ final class TestEmitter
         $lines[] = '{';
         $lines[] = implode("\n\n", $tests);
         $lines[] = '}';
+
         return Php::file($lines);
     }
 
@@ -60,6 +62,7 @@ final class TestEmitter
     private function ownsValidationTest(int $index, array $entry): bool
     {
         $class = $entry['requestClass'];
+
         return $class !== null
             && ($this->plan->classes[$class]['entry'] ?? null) === $index
             && $this->plan->requiredKeys($class) !== [];
@@ -71,20 +74,21 @@ final class TestEmitter
         $model = $entry['responseModel'];
         $path = $this->samplePath($entry);
         $args = $this->callArgs($entry, $body);
-        $call = "asaas()->{$entry['property']}->{$entry['sdkMethod']}(" . implode(', ', $args['code']) . ')';
+        $call = "asaas()->{$entry['property']}->{$entry['sdkMethod']}(".implode(', ', $args['code']).')';
 
-        $lines = ['    public function test_' . Php::snake($entry['sdkMethod']) . $suffix . '(): void', '    {'];
-        $lines[] = '        ' . $this->fake($entry);
+        $lines = ['    public function test_'.Php::snake($entry['sdkMethod']).$suffix.'(): void', '    {'];
+        $lines[] = '        '.$this->fake($entry);
         $lines[] = '';
         $lines[] = $model === 'void' ? "        $call;" : "        \$result = $call;";
         $lines[] = '';
-        $lines[] = '        ' . $this->assertSent($entry, $path, $args);
+        $lines[] = '        '.$this->assertSent($entry, $path, $args);
         if ($model === 'string') {
-            $lines[] = "        \$this->assertSame('" . self::PDF_SAMPLE . "', \$result);";
+            $lines[] = "        \$this->assertSame('".self::PDF_SAMPLE."', \$result);";
         } elseif ($model !== 'void') {
             $lines[] = "        \$this->assertInstanceOf($model::class, \$result);";
         }
         $lines[] = '    }';
+
         return implode("\n", $lines);
     }
 
@@ -93,8 +97,8 @@ final class TestEmitter
     {
         return match ($entry['responseModel']) {
             'void' => "\$this->fakeResponse('', 204);",
-            'string' => "\$this->fakeResponse('" . self::PDF_SAMPLE . "', 200, ['Content-Type' => 'application/pdf']);",
-            default => '$this->fakeResponse(' . Php::export($this->responseSample($entry)) . ');',
+            'string' => "\$this->fakeResponse('".self::PDF_SAMPLE."', 200, ['Content-Type' => 'application/pdf']);",
+            default => '$this->fakeResponse('.Php::export($this->responseSample($entry)).');',
         };
     }
 
@@ -103,6 +107,7 @@ final class TestEmitter
     {
         $content = $this->plan->spec->successContent($entry['op']);
         $sample = $this->plan->sample->forEntry($entry)->response($content['application/json']['schema'] ?? []);
+
         return is_array($sample) ? $sample : [];
     }
 
@@ -113,6 +118,7 @@ final class TestEmitter
         $path = Php::export($path);
         if ($entry['multipart']) {
             $names = Php::export(array_keys($args['body']));
+
             return "\$this->assertMultipartSent($path, $names);";
         }
         $body = in_array($entry['method'], ['POST', 'PUT', 'PATCH'], true) ? $args['body'] : null;
@@ -125,7 +131,8 @@ final class TestEmitter
         while ($accept === null && $extra !== [] && in_array(end($extra), ['[]', 'null'], true)) {
             array_pop($extra);
         }
-        return "\$this->assertRequestSent($method, $path" . ($extra ? ', ' . implode(', ', $extra) : '') . ');';
+
+        return "\$this->assertRequestSent($method, $path".($extra ? ', '.implode(', ', $extra) : '').');';
     }
 
     /** @param array<string, mixed> $entry @return array{code: list<string>, body: array<string, mixed>, query: array<string, mixed>} */
@@ -142,6 +149,7 @@ final class TestEmitter
             $query = $this->plan->sampleQuery($entry);
             $code[] = Php::export($query);
         }
+
         return ['code' => $code, 'body' => $body, 'query' => $query];
     }
 
@@ -153,10 +161,11 @@ final class TestEmitter
         if ($entry['hasBody']) {
             $args[] = '[]';
         }
-        $call = "asaas()->{$entry['property']}->{$entry['sdkMethod']}(" . implode(', ', $args) . ')';
+        $call = "asaas()->{$entry['property']}->{$entry['sdkMethod']}(".implode(', ', $args).')';
         $keys = Php::export($this->plan->requiredKeys($class));
+
         return implode("\n", [
-            '    public function test_' . Php::snake($entry['sdkMethod']) . '_rejects_missing_required_fields(): void',
+            '    public function test_'.Php::snake($entry['sdkMethod']).'_rejects_missing_required_fields(): void',
             '    {',
             "        \$this->assertValidationRejected(fn () => $call, $keys);",
             '    }',
@@ -167,7 +176,7 @@ final class TestEmitter
      * For bodies where creditCardToken replaces creditCard/creditCardHolderInfo: one call with only the token must
      * be sent, one with neither must be rejected.
      *
-     * @param array<string, mixed> $entry @return list<string>
+     * @param  array<string, mixed>  $entry  @return list<string>
      */
     private function tokenAlternativeTests(array $entry): array
     {
@@ -184,13 +193,14 @@ final class TestEmitter
         $withToken = $base + ['creditCardToken' => $this->plan->sample->forEntry($entry)->value(['type' => 'string'], 0, 'creditCardToken')];
         $name = Php::snake($entry['sdkMethod']);
         $args = array_map(fn ($n) => Php::export($this->pathValue($n)), $entry['pathParams']);
-        $neither = "asaas()->{$entry['property']}->{$entry['sdkMethod']}(" . implode(', ', [...$args, Php::export($base)]) . ')';
+        $neither = "asaas()->{$entry['property']}->{$entry['sdkMethod']}(".implode(', ', [...$args, Php::export($base)]).')';
+
         return [
             $this->operationTest($entry, '_accepts_token_instead_of_card_fields', $withToken),
             implode("\n", [
                 "    public function test_{$name}_rejects_neither_card_fields_nor_token(): void",
                 '    {',
-                "        \$this->assertValidationRejected(fn () => $neither, " . Php::export($alternatives) . ');',
+                "        \$this->assertValidationRejected(fn () => $neither, ".Php::export($alternatives).');',
                 '    }',
             ]),
         ];
@@ -198,7 +208,7 @@ final class TestEmitter
 
     private function pathValue(string $name): string
     {
-        return $name === 'phoneNumber' ? '11999999999' : $name . '_1';
+        return $name === 'phoneNumber' ? '11999999999' : $name.'_1';
     }
 
     /** @param array<string, mixed> $entry */
@@ -206,8 +216,9 @@ final class TestEmitter
     {
         $path = $entry['path'];
         foreach ($entry['pathParams'] as $name) {
-            $path = str_replace('{' . $name . '}', rawurlencode($this->pathValue($name)), $path);
+            $path = str_replace('{'.$name.'}', rawurlencode($this->pathValue($name)), $path);
         }
+
         return $path;
     }
 }

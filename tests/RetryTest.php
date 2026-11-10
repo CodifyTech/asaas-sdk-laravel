@@ -1,15 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Asaas\Laravel\Tests;
 
 use Asaas\Laravel\AsaasServiceProvider;
+use Asaas\Laravel\Exceptions\ApiError;
+use Asaas\Laravel\Exceptions\ErrorResponseDtoException;
 use Illuminate\Support\Facades\Http;
 use Orchestra\Testbench\TestCase;
 
-// Guards the illuminate ^9.7 floor in composer.json: the retry-when callback fails on Laravel 9.6.
+// End-to-end retry behaviour through the container-bound SDK.
 class RetryTest extends TestCase
 {
-    // Untyped $app on purpose: Testbench 7 through 11 declare these hooks without a parameter type.
+    // Untyped $app on purpose: Testbench 9 through 11 declare these hooks without a parameter type.
     protected function getPackageProviders($app)
     {
         return [AsaasServiceProvider::class];
@@ -42,7 +46,7 @@ class RetryTest extends TestCase
         try {
             asaas()->customer->list();
             $this->fail('Expected ErrorResponseDtoException for HTTP 400.');
-        } catch (\Asaas\Laravel\Exceptions\ErrorResponseDtoException $e) {
+        } catch (ErrorResponseDtoException $e) {
             $this->assertSame(400, $e->statusCode);
         }
 
@@ -56,7 +60,7 @@ class RetryTest extends TestCase
         try {
             asaas()->customer->create(['name' => 'N', 'cpfCnpj' => '12345678909']);
             $this->fail('Expected ApiError for HTTP 503.');
-        } catch (\Asaas\Laravel\Exceptions\ApiError $e) {
+        } catch (ApiError $e) {
             $this->assertSame(503, $e->statusCode);
         }
 

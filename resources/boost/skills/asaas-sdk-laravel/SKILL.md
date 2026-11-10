@@ -1,29 +1,29 @@
 ---
 name: asaas-sdk-laravel
-description: Use when integrating Asaas payments in a Laravel app with luquinhasbrito/asaas-api-sdk-laravel (Asaas API v3): charges (cobrancas), Pix, boleto, credit card and tokenization, subscriptions, installments, split, refunds, transfers, webhooks, subaccounts, sandbox testing. Triggers on `asaas()`, `Asaas\Laravel\AsaasSdk`, ASAAS_API_KEY, "Asaas".
+description: Use when integrating Asaas payments in a Laravel app with codifytech/asaas-sdk-laravel (Asaas API v3): charges (cobrancas), Pix, boleto, credit card and tokenization, subscriptions, installments, split, refunds, transfers, webhooks, subaccounts, sandbox testing. Triggers on `asaas()`, `Asaas\Laravel\AsaasSdk`, ASAAS_API_KEY, "Asaas".
 ---
 
 # asaas-sdk-laravel
 
-PHP SDK for Asaas API v3 on top of Laravel's `Http` facade. 213 endpoints in 34 services, each one a readonly property of `Asaas\Laravel\AsaasSdk`. It only works inside a booted Laravel app (needs the `Http` and `Validator` facades).
+PHP SDK for Asaas API v3 on top of Laravel's `Http` facade, by CodifyTech. 213 endpoints in 34 services, each one a readonly property of `Asaas\Laravel\AsaasSdk`. Requires PHP ^8.4 and Laravel 11, 12 or 13. It only works inside a booted Laravel app (needs the `Http` and `Validator` facades).
 
 The code is the source of truth: before using a method, confirm its name and signature in `src/Services/{Name}Service.php` and its rules in `src/Http/Requests/{Service}/`. Never invent a method; if it is not there, say so.
 
 ## Setup
 
-1. `composer require luquinhasbrito/asaas-api-sdk-laravel` (provider and `asaas()` helper are auto-discovered).
-2. `php artisan vendor:publish --tag=asaas-config` (creates `config/asaas.php`).
+1. `composer require codifytech/asaas-sdk-laravel` (provider and `asaas()` helper are auto-discovered).
+2. Optional: `php artisan vendor:publish --tag=asaas-config` (creates `config/asaas.php`; only needed to edit keys without an env var, such as `retry.methods`).
 3. `.env`:
 
 ```env
 ASAAS_API_KEY=your_key
-ASAAS_ENV=sandbox          # production | prod -> production; ANY other value -> sandbox
+ASAAS_ENV=sandbox          # production | prod | sandbox (case-insensitive); any other value throws InvalidArgumentException
 ASAAS_TIMEOUT=10000        # milliseconds
-ASAAS_RETRY_MAX=1          # total attempts, 1 = no retry
-# ASAAS_BASE_URL=          # overrides the environment URL; leave unset, an empty value breaks it
+ASAAS_RETRY_MAX=1          # retries after the first attempt (0 to 10), 0 = no retry
+# ASAAS_BASE_URL=          # overrides the environment URL; must be https:// (http:// only for localhost/127.0.0.1/[::1]); leave unset otherwise
 ```
 
-Keys in `config/asaas.php`: `api_key`, `environment`, `base_url`, `timeout`, `user_agent`, `retry.{max_retries,initial_delay,max_delay,backoff_factor,jitter,status_codes,methods}`. The key is sent in the `access_token` header. Real URLs: `https://api-sandbox.asaas.com` and `https://api.asaas.com`.
+Keys in `config/asaas.php`: `api_key`, `environment`, `base_url`, `timeout`, `user_agent` (default `codifytech-asaas-sdk-laravel/1.0.0`), `retry.{max_retries,initial_delay,max_delay,backoff_factor,jitter,status_codes,methods}`. The key is sent in the `access_token` header. Real URLs: `https://api-sandbox.asaas.com` and `https://api.asaas.com`.
 
 ## Access patterns
 
@@ -143,8 +143,10 @@ Sandbox only: `asaas()->sandboxActions->confirmPayment($paymentId)` simulates pa
 
 ## Gotchas
 
-- `ASAAS_ENV` typos (`producao`) silently select sandbox. An empty `ASAAS_BASE_URL=` overrides the environment.
-- `retry.max_retries` is total attempts (1 = none); delay is fixed `initial_delay`; `max_delay`, `backoff_factor`, `jitter` are ignored. `timeout` is milliseconds and applies per attempt.
+- `ASAAS_ENV` typos (`producao`) throw `InvalidArgumentException` when the SDK is built. A `base_url` with `http://` (non-loopback host) throws too.
+- Path params (ids) that are empty, `.` or `..` throw `InvalidArgumentException` before any request; other values are URL-encoded. Check ids from user input before calling.
+- `retry.max_retries` is the number of retries after the first attempt (0 = none, default 1, max 10), only for `retry.methods`. Wait before retry n is `min(initial_delay * backoff_factor^(n-1), max_delay)` ms plus random jitter of 0 to `jitter` ms (defaults 150, 2, 1000, 150); a numeric `Retry-After` is honored up to `max_delay`. `timeout` is milliseconds and applies per attempt.
+- The API key is `#[\SensitiveParameter]` and shown as `***` in `var_dump`/`print_r` of the config objects; your own logs are still your responsibility.
 - Network failures throw `Illuminate\Http\Client\ConnectionException`, not `ApiError`.
 - Split key differs: `split` on payments and subscriptions, `splits` on installments (`installmentNumber` allowed there).
 - `value` plus `installmentCount` on installments: `value` is per installment, or send `totalValue`.

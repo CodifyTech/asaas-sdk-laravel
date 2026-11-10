@@ -1,20 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Asaas\Laravel\Tests\Http;
 
 use Asaas\Laravel\AsaasServiceProvider;
 use Asaas\Laravel\Config\AsaasSdkConfig;
+use Asaas\Laravel\Exceptions\ErrorResponseDtoException;
 use Asaas\Laravel\Http\AsaasHttpClient;
 use Asaas\Laravel\Http\RequestBuilder;
 use Asaas\Laravel\Services\BaseService;
 use Illuminate\Http\Client\Request;
+use Illuminate\Http\Client\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 use Orchestra\Testbench\TestCase;
 
 class AsaasHttpClientTest extends TestCase
 {
-    // Untyped $app on purpose: Testbench 7 through 11 declare these hooks without a parameter type.
+    // Untyped $app on purpose: Testbench 9 through 11 declare these hooks without a parameter type.
     protected function getPackageProviders($app)
     {
         return [AsaasServiceProvider::class];
@@ -97,7 +101,7 @@ class AsaasHttpClientTest extends TestCase
     {
         Http::fake(['*' => Http::response(['errors' => [['code' => 'c', 'description' => 'd']]], 400)]);
 
-        $this->expectException(\Asaas\Laravel\Exceptions\ErrorResponseDtoException::class);
+        $this->expectException(ErrorResponseDtoException::class);
 
         $this->service()->noContent();
     }
@@ -110,6 +114,7 @@ class AsaasHttpClientTest extends TestCase
 
         Http::assertSent(function (Request $r) {
             $parts = $this->partsByName($r);
+
             return $r->isMultipart()
                 && $parts['type'] === 'IDENTIFICATION'
                 && $parts['flag'] === 'true'
@@ -128,6 +133,7 @@ class AsaasHttpClientTest extends TestCase
 
         Http::assertSent(function (Request $r) use ($file) {
             $part = $r->data()[0] ?? [];
+
             return $r->isMultipart()
                 && $part['name'] === 'documentFile'
                 && $part['filename'] === 'doc.pdf'
@@ -149,6 +155,7 @@ class AsaasHttpClientTest extends TestCase
 
         Http::assertSent(function (Request $r) use ($path) {
             [$a, $b] = $r->data();
+
             return $a['contents'] === 'spl-content' && $a['filename'] === basename($path)
                 && $b['contents'] === 'stream-content' && $b['filename'] !== '';
         });
@@ -164,6 +171,7 @@ class AsaasHttpClientTest extends TestCase
 
         Http::assertSent(function (Request $r) {
             $data = $r->data();
+
             return count($data) === 4
                 && $data[0]['name'] === 'files' && $data[0]['filename'] === 'one.pdf'
                 && $data[1]['name'] === 'files' && $data[1]['filename'] === 'two.pdf'
@@ -180,6 +188,7 @@ class AsaasHttpClientTest extends TestCase
 
         Http::assertSent(function (Request $r) {
             $part = $r->data()[0];
+
             return $part['contents'] === __FILE__ && ! array_key_exists('filename', $part);
         });
     }
@@ -221,13 +230,14 @@ class AsaasHttpClientTest extends TestCase
     {
         $config = AsaasSdkConfig::fromArray(['api_key' => 'key_test']);
 
-        return new class (new AsaasHttpClient($config), $config) extends BaseService {
+        return new class(new AsaasHttpClient($config), $config) extends BaseService
+        {
             public function pdf(): string
             {
                 return $this->execute($this->buildRequest(new RequestBuilder('v3/book')))->body();
             }
 
-            public function noContent(): \Illuminate\Http\Client\Response
+            public function noContent(): Response
             {
                 return $this->execute($this->buildRequest(new RequestBuilder('v3/x', 'DELETE')));
             }

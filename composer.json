@@ -1,25 +1,44 @@
 {
-    "name": "luquinhasbrito/asaas-api-sdk-laravel",
-    "description": "SDK Laravel para a API Asaas v3 - cliente HTTP com retry, serviços, Models e Form Requests",
+    "name": "codifytech/asaas-sdk-laravel",
+    "description": "SDK Laravel para a API Asaas v3: cliente HTTP com retry, serviços tipados, Models e validação de requisições.",
     "type": "library",
     "license": "MIT",
-    "version": "2.0.0",
+    "version": "1.0.0",
+    "keywords": [
+        "asaas",
+        "laravel",
+        "sdk",
+        "pix",
+        "boleto",
+        "payments",
+        "pagamentos",
+        "api"
+    ],
+    "homepage": "https://github.com/CodifyTech/asaas-sdk-laravel",
+    "support": {
+        "issues": "https://github.com/CodifyTech/asaas-sdk-laravel/issues",
+        "source": "https://github.com/CodifyTech/asaas-sdk-laravel",
+        "security": "https://github.com/CodifyTech/asaas-sdk-laravel/security/policy"
+    },
     "authors": [
         {
-            "name": "WDT",
-            "homepage": "https://github.com/lucasbrito-wdt/asaas-api-sdk-laravel"
+            "name": "CodifyTech",
+            "homepage": "https://github.com/CodifyTech"
         }
     ],
     "require": {
-        "php": "^8.1",
-        "guzzlehttp/guzzle": "^7.2",
-        "illuminate/http": "^9.7|^10.0|^11.0|^12.0|^13.0",
-        "illuminate/support": "^9.7|^10.0|^11.0|^12.0|^13.0",
-        "illuminate/validation": "^9.7|^10.0|^11.0|^12.0|^13.0"
+        "php": "^8.4",
+        "guzzlehttp/guzzle": "^7.8",
+        "illuminate/http": "^11.0|^12.0|^13.0",
+        "illuminate/support": "^11.0|^12.0|^13.0",
+        "illuminate/validation": "^11.0|^12.0|^13.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.5|^10.0|^11.0|^12.0|^13.0",
-        "orchestra/testbench": "^7.0|^8.0|^9.0|^10.0|^11.0"
+        "larastan/larastan": "^3.0",
+        "laravel/pint": "^1.18",
+        "orchestra/testbench": "^9.0|^10.0|^11.0",
+        "phpstan/phpstan": "^2.0",
+        "phpunit/phpunit": "^11.5|^12.0|^13.0"
     },
     "autoload": {
         "psr-4": {
@@ -42,14 +61,25 @@
         }
     },
     "scripts": {
+        "test": "phpunit",
+        "analyse": "phpstan analyse --memory-limit=1G",
+        "format": "pint",
+        "format:check": "pint --test",
         "generate": "php tools/generator/generate.php",
-        "generate:check": "php tools/generator/generate.php --check --strict"
+        "generate:check": "php tools/generator/generate.php --check --strict",
+        "ci": [
+            "@format:check",
+            "@analyse",
+            "@generate:check",
+            "@test"
+        ]
     },
     "config": {
         "sort-packages": true,
-        "allow-plugins": {
-            "pestphp/pest-plugin": true
-        }
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "allow-plugins": false
     },
-    "minimum-stability": "stable"
+    "minimum-stability": "stable",
+    "prefer-stable": true
 }

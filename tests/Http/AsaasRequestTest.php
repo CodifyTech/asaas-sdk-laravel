@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Asaas\Laravel\Tests\Http;
 
 use Asaas\Laravel\Http\Requests\AsaasRequest;

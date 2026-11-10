@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Asaas\Laravel\Tests;
 
 use Asaas\Laravel\AsaasSdk;
@@ -13,9 +15,10 @@ use Orchestra\Testbench\TestCase;
 class AsaasServiceProviderTest extends TestCase
 {
     private const API_KEY = 'key_prod';
+
     private const USER_AGENT = 'provider-test-agent/9.9';
 
-    // Untyped $app on purpose: Testbench 7 through 11 declare these hooks without a parameter type.
+    // Untyped $app on purpose: Testbench 9 through 11 declare these hooks without a parameter type.
     protected function getPackageProviders($app)
     {
         return [AsaasServiceProvider::class];

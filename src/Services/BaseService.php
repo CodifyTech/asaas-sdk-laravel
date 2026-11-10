@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Asaas\Laravel\Services;
 
 use Asaas\Laravel\Config\AsaasSdkConfig;
@@ -10,9 +12,12 @@ use Asaas\Laravel\Http\ModelConverter;
 use Asaas\Laravel\Http\RequestBuilder;
 use Illuminate\Http\Client\Response;
 
+/**
+ * @phpstan-type AsaasRequestShape array{method: string, path: string, headers?: array<string, string>, body?: mixed, multipart?: bool}
+ */
 abstract class BaseService
 {
-    /** @var array<int, array{exception: class-string}> */
+    /** @var array<int, array{exception: class-string<ApiError>}> */
     protected array $errorMappings = [
         400 => ['exception' => ErrorResponseDtoException::class],
     ];
@@ -20,16 +25,17 @@ abstract class BaseService
     public function __construct(
         protected AsaasHttpClient $httpClient,
         protected AsaasSdkConfig $config,
-    ) {
-    }
+    ) {}
 
+    /** @param class-string<ApiError> $exceptionClass */
     protected function addErrorMapping(int $status, string $exceptionClass = ErrorResponseDtoException::class): void
     {
         $this->errorMappings[$status] = ['exception' => $exceptionClass];
     }
 
     /**
-     * @param array{method: string, path: string, headers: array, body: mixed, multipart?: bool} $request
+     * @param  AsaasRequestShape  $request
+     *
      * @throws ApiError|ErrorResponseDtoException
      */
     protected function execute(array $request): Response
@@ -46,27 +52,26 @@ abstract class BaseService
             return $response;
         }
 
-        $status = $response->status();
-        $mapping = $this->errorMappings[$status] ?? null;
+        $exception = $this->errorMappings[$response->status()]['exception'] ?? ApiError::class;
 
-        if ($mapping !== null && $mapping['exception'] === ErrorResponseDtoException::class) {
-            throw ErrorResponseDtoException::fromResponse($response);
-        }
-
-        throw ApiError::fromResponse($response);
+        throw $exception::fromResponse($response);
     }
 
     /**
-     * @param array{method: string, path: string, headers: array, body: mixed, multipart?: bool} $request
-     * @param class-string $dtoClass
-     * @return object
+     * @template T of object
+     *
+     * @param  AsaasRequestShape  $request
+     * @param  class-string<T>  $dtoClass
+     * @return T
+     *
+     * @throws ApiError|ErrorResponseDtoException
      */
     protected function executeAndMap(array $request, string $dtoClass): object
     {
-        $response = $this->execute($request);
-        return ModelConverter::toObject($response, $dtoClass);
+        return ModelConverter::toObject($this->execute($request), $dtoClass);
     }
 
+    /** @return AsaasRequestShape */
     protected function buildRequest(RequestBuilder $builder): array
     {
         return $builder->build();

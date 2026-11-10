@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Asaas\Laravel\Http\Requests;
 
 use Illuminate\Support\Facades\Validator;
@@ -14,13 +16,15 @@ abstract class AsaasRequest
     /**
      * Validates a body and returns it unchanged, so fields newer than the SDK still reach the API.
      *
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      * @return array<string, mixed>
+     *
      * @throws ValidationException
      */
     public static function validate(array $data): array
     {
         Validator::make($data, static::rules())->validate();
+
         return $data;
     }
 
@@ -28,8 +32,9 @@ abstract class AsaasRequest
      * Validates a query and rejects keys without a rule: Asaas ignores unknown filters and
      * returns an unfiltered list, which would expose data.
      *
-     * @param array<string, mixed> $params
+     * @param  array<string, mixed>  $params
      * @return array<string, mixed>
+     *
      * @throws ValidationException
      */
     public static function validateQuery(array $params): array
@@ -38,7 +43,7 @@ abstract class AsaasRequest
         $messages = [];
         foreach (array_keys($params) as $key) {
             if (! in_array((string) $key, $allowed, true)) {
-                $messages[(string) $key] = ['O parâmetro de consulta "' . $key . '" não é suportado.'];
+                $messages[(string) $key] = ['O parâmetro de consulta "'.$key.'" não é suportado.'];
             }
         }
         if ($messages !== []) {
@@ -46,6 +51,7 @@ abstract class AsaasRequest
         }
 
         Validator::make($params, static::rules())->validate();
+
         return $params;
     }
 
@@ -56,7 +62,7 @@ abstract class AsaasRequest
             $isFile = static fn ($v): bool => $v instanceof \SplFileInfo || is_resource($v);
             $items = is_array($value) && array_is_list($value) ? $value : [$value];
             if ($items === [] || array_filter($items, $isFile) !== $items) {
-                $fail('O campo ' . $attribute . ' deve ser um arquivo.');
+                $fail('O campo '.$attribute.' deve ser um arquivo.');
             }
         };
     }

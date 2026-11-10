@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Asaas\Laravel\Tests;
 
 use Asaas\Laravel\Http\Requests\Payment\ListPaymentsRequest;

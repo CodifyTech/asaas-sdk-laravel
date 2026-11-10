@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Asaas\Laravel\Http;
 
 use Illuminate\Http\Client\Response;
@@ -8,26 +10,30 @@ use Illuminate\Support\Str;
 
 final class ModelConverter
 {
+    /** @return array<array-key, mixed> */
     public static function toArray(Response $response): array
     {
-        return $response->json() ?? [];
+        $json = $response->json();
+
+        return is_array($json) ? $json : [];
     }
 
     /**
      * @template T of object
-     * @param class-string<T> $class
+     *
+     * @param  class-string<T>  $class
      * @return T
      */
     public static function toObject(Response $response, string $class): object
     {
-        $data = self::toArray($response);
-        return self::fromArray($data, $class);
+        return self::fromArray(self::toArray($response), $class);
     }
 
     /**
      * @template T of object
-     * @param array<string, mixed> $data
-     * @param class-string<T> $class
+     *
+     * @param  array<array-key, mixed>  $data
+     * @param  class-string<T>  $class
      * @return T
      */
     public static function fromArray(array $data, string $class): object
@@ -38,36 +44,38 @@ final class ModelConverter
         if (method_exists($class, 'from')) {
             return $class::from($data);
         }
-        return (new \ReflectionClass($class))->newInstanceArgs(
-            self::mapConstructorArgs($data, $class)
-        );
+
+        return new \ReflectionClass($class)->newInstanceArgs(self::mapConstructorArgs($data, $class));
     }
 
-    /** @param array<string, mixed> $data */
+    /**
+     * @param  array<array-key, mixed>  $data
+     * @param  class-string  $class
+     * @return list<mixed>
+     */
     private static function mapConstructorArgs(array $data, string $class): array
     {
-        $ctor = (new \ReflectionClass($class))->getConstructor();
-        if ($ctor === null) {
+        $constructor = new \ReflectionClass($class)->getConstructor();
+        if ($constructor === null) {
             return [];
         }
+
         $args = [];
-        foreach ($ctor->getParameters() as $param) {
+        foreach ($constructor->getParameters() as $param) {
             $name = $param->getName();
-            $key = Str::snake($name);
-            $value = Arr::get($data, $key, Arr::get($data, $name));
-            $args[] = $value;
+            $args[] = Arr::get($data, Str::snake($name), Arr::get($data, $name));
         }
+
         return $args;
     }
 
     public static function toJson(mixed $model): string
     {
-        if (is_array($model)) {
-            return json_encode($model, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $flags = JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
+        if (is_object($model) && method_exists($model, 'toArray')) {
+            return json_encode($model->toArray(), $flags);
         }
-        if (method_exists($model, 'toArray')) {
-            return json_encode($model->toArray(), JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        }
-        return json_encode($model, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+        return json_encode($model, $flags);
     }
 }

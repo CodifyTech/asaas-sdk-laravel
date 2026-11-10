@@ -9,11 +9,17 @@ Receitas passo a passo para devs e agentes de IA (Claude Code, Cursor, Laravel B
 - Valores monetários são decimais em reais (`129.90`), nunca centavos. Datas são `Y-m-d`.
 - POST não sofre retry por padrão. Não adicione `POST` em `retry.methods`: o SDK não envia chave de idempotência.
 - Use `externalReference` como chave de idempotência da sua aplicação e consulte antes de recriar.
-- Nunca registre em log a API key, número do cartão, `ccv` ou `creditCardToken`.
-- Teste sempre em sandbox (`ASAAS_ENV=sandbox`) antes de produção.
+- Nunca registre em log a API key, número do cartão, `ccv` ou `creditCardToken`. O SDK já oculta a chave (`***`) em `var_dump`/`print_r` dos objetos de configuração, mas isso não protege logs que você monta.
+- Teste sempre em sandbox (`ASAAS_ENV=sandbox`) antes de produção. `ASAAS_ENV` aceita apenas `production` (ou `prod`) e `sandbox`; outro valor lança `InvalidArgumentException`.
+- `ASAAS_BASE_URL`, se usada, precisa ser `https://`. `http://` só é aceito para `localhost`, `127.0.0.1` e `[::1]` (mock local).
+- Ids passados como parâmetro de rota não podem ser vazios, `.` ou `..`: o SDK lança `InvalidArgumentException` antes da requisição.
 - Os exemplos usam CPF e IDs fictícios. Em sandbox, a chave de API é diferente da de produção.
 
-Configuração mínima:
+Instalação e configuração mínima:
+
+```bash
+composer require codifytech/asaas-sdk-laravel
+```
 
 ```env
 ASAAS_API_KEY=sua_chave_sandbox
@@ -443,9 +449,10 @@ try {
 
 Regras de retry (`config/asaas.php`):
 
-- `retry.max_retries` é o total de tentativas (padrão `1` = sem retry); a espera é fixa (`initial_delay` ms).
+- `retry.max_retries` é o número de novas tentativas depois da primeira (0 a 10; `0` desliga). O padrão `1` repete uma vez os métodos elegíveis.
+- A espera usa backoff exponencial: antes da nova tentativa `n`, `min(initial_delay × backoff_factor^(n-1), max_delay)` ms mais um jitter aleatório de 0 a `jitter` ms (padrões 150, 2, 1000 e 150). Um `Retry-After` em segundos é respeitado até `max_delay`.
 - `retry.methods` padrão: `['GET', 'PUT', 'DELETE']`. POST fica de fora de propósito: não o adicione.
-- Para operações de leitura, aumentar `ASAAS_RETRY_MAX=3` é seguro. Para criar (POST), implemente retry na aplicação com `externalReference` + consulta prévia.
+- Para operações de leitura, aumentar para `ASAAS_RETRY_MAX=3` é seguro. Para criar (POST), implemente retry na aplicação com `externalReference` + consulta prévia.
 - Chaves de query não suportadas em `list()` lançam `ValidationException` (o SDK não deixa a Asaas ignorar o filtro).
 
 ---
@@ -550,7 +557,7 @@ Outros: `subaccount->list()`, `get($id)`, `listAccessTokens($id)`, `createAccess
 
 ## Prompts prontos
 
-Copie e cole para o agente. Eles assumem que a skill `asaas-sdk-laravel` está instalada ou que o agente leu este playbook.
+Copie e cole para o agente. Eles assumem que o pacote `codifytech/asaas-sdk-laravel` e a skill `asaas-sdk-laravel` estão instalados, ou que o agente leu este playbook.
 
 - "Usando o asaas-sdk-laravel, crie um service `PixCheckoutService` que cria (ou reaproveita por externalReference) o cliente, gera uma cobrança Pix e retorna a imagem do QR Code e o copia e cola. Valores em reais, teste com Http::fake."
 - "Implemente o recebimento de webhooks da Asaas: rota, controller que valida o header asaas-access-token com hash_equals, tabela de deduplicação por id do evento e job em fila que marca o pedido como pago em PAYMENT_RECEIVED."

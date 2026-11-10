@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AsaasTools;
 
 /** Map entries enriched with spec data: rules, shared request classes, samples. */
@@ -10,14 +12,18 @@ final class Plan
 
     /** @var list<array<string, mixed>> */
     public array $entries = [];
+
     /** @var array<string, array{fields: list<array<string, mixed>>, entry: int, kind: string}> */
     public array $classes = [];
+
     /** @var array<string, list<int>> service => entry indexes */
     public array $services = [];
+
     /** @var list<string> */
     public array $errors = [];
 
     public RulesBuilder $rules;
+
     public Sample $sample;
 
     /** @param list<array<string, mixed>> $map */
@@ -51,6 +57,7 @@ final class Plan
     {
         $owner = $this->entries[$this->classes[$entry['requestClass']]['entry']];
         $sample = $this->sample->forEntry($entry);
+
         return $entry['multipart'] ? $sample->multipartBody($owner['bodySchema']) : $sample->body($owner['bodySchema']);
     }
 
@@ -67,6 +74,7 @@ final class Plan
         if ($entry['paginated']) {
             $query = $query + ['offset' => 0, 'limit' => 10];
         }
+
         return $query;
     }
 
@@ -79,6 +87,7 @@ final class Plan
                 $keys[] = $field['key'];
             }
         }
+
         return $keys;
     }
 
@@ -99,6 +108,7 @@ final class Plan
         $entry['bodySchema'] = $body;
         $entry['queryParams'] = $query;
         $entry['title'] = (string) ($op['summary'] ?? $entry['sdkMethod']);
+
         return $entry;
     }
 
@@ -106,13 +116,14 @@ final class Plan
      * Entries with `rulesFrom` reuse another class's rules and body sample (spec bug: empty body); `allOptional`
      * turns its top-level required rules into nullable.
      *
-     * @param array<string, mixed> $entry @return array<string, mixed>
+     * @param  array<string, mixed>  $entry  @return array<string, mixed>
      */
     private function copyRules(array $entry): array
     {
         $source = $this->classes[$entry['rulesFrom']] ?? null;
         if ($source === null) {
             $this->errors[] = "rulesFrom {$entry['rulesFrom']} is not a request class with rules";
+
             return $entry;
         }
         $fields = $source['fields'];
@@ -127,6 +138,7 @@ final class Plan
         }
         $entry['fields'] = $fields;
         $entry['bodySchema'] = $this->entries[$source['entry']]['bodySchema'];
+
         return $entry;
     }
 

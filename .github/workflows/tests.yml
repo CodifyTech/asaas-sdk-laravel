@@ -1,42 +1,83 @@
 name: tests
+
 on:
   push:
     branches: [master]
+    tags: ['v*']
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  tests:
+  quality:
+    name: Quality (format, static analysis, generated code, audit)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring
+          coverage: none
+          tools: composer:v2
+      - name: Validate composer.json
+        # The version field is kept on purpose (it must match the release tag).
+        run: composer validate --strict --no-check-lock --no-check-version
+      - name: Install dependencies
+        run: composer update --prefer-dist --no-interaction --no-progress
+      - name: Audit dependencies
+        run: composer audit --no-interaction
+      - name: Check formatting
+        run: composer format:check
+      - name: Static analysis
+        run: composer analyse -- --no-progress --error-format=github
+      - name: Generated code matches the endpoint map
+        run: composer generate:check
+
+  tests:
     name: PHP ${{ matrix.php }} - Laravel ${{ matrix.laravel }} - ${{ matrix.stability }}
-    env:
-      COMPOSER_NO_SECURITY_BLOCKING: 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.1', '8.2', '8.3', '8.4', '8.5']
-        laravel: ['^9.7', '^10.0', '^11.0', '^12.0', '^13.0']
+        php: ['8.4', '8.5']
+        laravel: ['^11.0', '^12.0', '^13.0']
         stability: [prefer-lowest, prefer-stable]
         include:
-          - { laravel: '^9.7',  testbench: '^7.0' }
-          - { laravel: '^10.0', testbench: '^8.0' }
           - { laravel: '^11.0', testbench: '^9.0' }
           - { laravel: '^12.0', testbench: '^10.0' }
           - { laravel: '^13.0', testbench: '^11.0' }
         exclude:
-          - { laravel: '^11.0', php: '8.1' }
-          - { laravel: '^12.0', php: '8.1' }
-          - { laravel: '^13.0', php: '8.1' }
-          - { laravel: '^13.0', php: '8.2' }
+          # Laravel 11 does not support PHP 8.5.
+          - { laravel: '^11.0', php: '8.5' }
+    env:
+      # prefer-lowest resolves the oldest releases on purpose to prove the constraints; Composer would
+      # otherwise refuse the ones with published advisories. Users always resolve to patched releases.
+      COMPOSER_NO_SECURITY_BLOCKING: ${{ matrix.stability == 'prefer-lowest' && '1' || '0' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
           extensions: mbstring
           coverage: none
+          tools: composer:v2
       - name: Install dependencies
         run: |
           composer require "illuminate/http:${{ matrix.laravel }}" "illuminate/support:${{ matrix.laravel }}" "illuminate/validation:${{ matrix.laravel }}" --no-interaction --no-update
           composer require --dev "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
-          composer update --${{ matrix.stability }} --prefer-stable --prefer-dist --no-interaction --no-progress
+          composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
       - name: Run tests
         run: vendor/bin/phpunit

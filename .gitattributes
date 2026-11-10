@@ -1,5 +1,18 @@
-/tools export-ignore
-/plans export-ignore
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.pdf binary
+
+# Kept out of the Composer dist archive: only src/, config/, resources/ and the docs reach users.
+/.claude export-ignore
 /.github export-ignore
 /tests export-ignore
-/.claude export-ignore
+/tools export-ignore
+/.editorconfig export-ignore
+/.gitattributes export-ignore
+/.gitignore export-ignore
+/CONTRIBUTING.md export-ignore
+/phpstan.neon.dist export-ignore
+/phpunit.xml export-ignore
+/pint.json export-ignore

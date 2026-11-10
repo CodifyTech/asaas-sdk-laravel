@@ -1,10 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Asaas\Laravel\Models;
 
 use Illuminate\Contracts\Support\Arrayable;
 
-/** Resposta de listagem paginada de transações PIX (API Asaas). */
+/**
+ * Resposta de listagem paginada de transações PIX (API Asaas).
+ *
+ * @implements Arrayable<string, mixed>
+ */
 final class PixTransactionList implements Arrayable
 {
     /** @param list<PixTransaction> $items */
@@ -12,8 +18,7 @@ final class PixTransactionList implements Arrayable
         public readonly array $items = [],
         public readonly ?int $totalCount = null,
         public readonly ?bool $hasMore = null,
-    ) {
-    }
+    ) {}
 
     /** @param array<string, mixed> $data */
     public static function fromArray(array $data): self
@@ -23,13 +28,15 @@ final class PixTransactionList implements Arrayable
         foreach (is_array($raw) ? $raw : [] as $item) {
             $items[] = PixTransaction::fromArray(is_array($item) ? $item : []);
         }
+
         return new self(
             items: $items,
-            totalCount: isset($data['totalCount']) ? (int) $data['totalCount'] : null,
-            hasMore: $data['hasMore'] ?? null,
+            totalCount: Cast::int($data['totalCount'] ?? null),
+            hasMore: Cast::bool($data['hasMore'] ?? null),
         );
     }
 
+    /** @return array<string, mixed> */
     public function toArray(): array
     {
         return [

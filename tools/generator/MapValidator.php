@@ -1,15 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AsaasTools;
 
-/** Ports the validation of plans/build_endpoint_map.py to the canonical map. */
+/** Validates tools/endpoint-map.json against the OpenAPI spec and the documentation index. */
 final class MapValidator
 {
     // Sanity counts: update together with the map when the official API grows.
     public const EXPECTED_OPERATIONS = 213;
+
     public const EXPECTED_SERVICES = 34;
 
-    /** Models that exist hand-written in src/Models (after the 2.0.0 deletions). */
+    /** Models that exist hand-written in src/Models (after the 1.0.0 deletions). */
     public const HAND_WRITTEN_MODELS = [
         'AccountDocument', 'AccountDocumentList', 'AccountInfo', 'Anticipation', 'AnticipationList', 'Bill', 'BillList',
         'Chargeback', 'ChargebackList', 'Checkout', 'CreditBureauReport', 'CreditBureauReportList', 'CreditCard', 'Customer',
@@ -39,14 +42,15 @@ final class MapValidator
     {
         $names = [];
         foreach (self::GENERATED_MODELS as $name) {
-            array_push($names, $name, $name . 'List');
+            array_push($names, $name, $name.'List');
         }
+
         return $names;
     }
 
     /**
-     * @param list<array<string, mixed>> $map
-     * @param array<string, string> $docPages "METHOD path" => page slug (tools/doc-pages.json)
+     * @param  list<array<string, mixed>>  $map
+     * @param  array<string, string>  $docPages  "METHOD path" => page slug (tools/doc-pages.json)
      * @return list<string>
      */
     public static function validate(array $map, Spec $spec, array $docPages): array
@@ -59,15 +63,16 @@ final class MapValidator
         foreach ($map as $i => $entry) {
             $missing = array_diff(self::REQUIRED_KEYS, array_keys($entry));
             if ($missing !== []) {
-                $errors[] = "entry #$i missing keys: " . implode(',', $missing);
+                $errors[] = "entry #$i missing keys: ".implode(',', $missing);
+
                 continue;
             }
-            $key = $entry['method'] . ' ' . $entry['path'];
+            $key = $entry['method'].' '.$entry['path'];
             if (isset($seen[$key])) {
                 $errors[] = "duplicate op $key";
             }
             $seen[$key] = true;
-            $pairKey = $entry['service'] . '.' . $entry['sdkMethod'];
+            $pairKey = $entry['service'].'.'.$entry['sdkMethod'];
             if (isset($pairs[$pairKey])) {
                 $errors[] = "duplicate sdkMethod $pairKey";
             }
@@ -80,14 +85,14 @@ final class MapValidator
             }
             array_push($errors, ...self::validateEntry($entry, $key, $spec));
             if (($docPages[$key] ?? null) !== $entry['docSlug']) {
-                $errors[] = "docSlug {$entry['docSlug']} is not the doc page of $key (" . ($docPages[$key] ?? 'no page') . ')';
+                $errors[] = "docSlug {$entry['docSlug']} is not the doc page of $key (".($docPages[$key] ?? 'no page').')';
             }
         }
 
         $specOps = $spec->operationKeys();
         $mapOps = array_keys($seen);
         if (count($map) !== self::EXPECTED_OPERATIONS) {
-            $errors[] = 'expected ' . self::EXPECTED_OPERATIONS . ' entries, got ' . count($map);
+            $errors[] = 'expected '.self::EXPECTED_OPERATIONS.' entries, got '.count($map);
         }
         foreach (array_diff($specOps, $mapOps) as $op) {
             $errors[] = "in spec, not in map: $op";
@@ -96,11 +101,12 @@ final class MapValidator
             $errors[] = "in map, not in spec: $op";
         }
         if (count($serviceProp) !== self::EXPECTED_SERVICES) {
-            $errors[] = 'expected ' . self::EXPECTED_SERVICES . ' services, got ' . count($serviceProp);
+            $errors[] = 'expected '.self::EXPECTED_SERVICES.' services, got '.count($serviceProp);
         }
         if (count(array_unique($serviceProp)) !== count($serviceProp)) {
             $errors[] = 'two services share a property';
         }
+
         return array_merge($errors, self::validateModels($map));
     }
 
@@ -146,6 +152,7 @@ final class MapValidator
         if ($isPdf && $entry['responseModel'] !== 'string') {
             $errors[] = "pdf response must map to string: $key";
         }
+
         return $errors;
     }
 
@@ -161,6 +168,7 @@ final class MapValidator
         foreach (array_diff(self::generatedModelNames(), $used) as $model) {
             $errors[] = "generated model unused: $model";
         }
+
         return $errors;
     }
 }

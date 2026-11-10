@@ -12,7 +12,7 @@ Classe base abstrata dos serviços do SDK. Centraliza a execução de requisiç�
 
 ---
 
-## Laravel (asaas-api-sdk-laravel)
+## Laravel (codifytech/asaas-sdk-laravel)
 
 ### Classe
 
@@ -46,5 +46,5 @@ $list = $customerService->list(['limit' => 10]); // internamente: buildRequest +
 
 ## Referência API Asaas
 
-- Documentação geral da API: [https://docs.asaas.com](https://docs.asaas.com). 
-- BaseService é interno aos SDKs; os endpoints reais são os dos recursos (ex.: clientes, cobranças) documentados por serviço.
+- Documentação geral da API: [https://docs.asaas.com](https://docs.asaas.com).
+- BaseService é interno ao SDK; os endpoints reais são os dos recursos (ex.: clientes, cobranças) documentados por serviço.

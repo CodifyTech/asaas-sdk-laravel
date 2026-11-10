@@ -1,18 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AsaasTools;
 
 /** Emits src/Services/<Service>.php and the request classes. */
 final class ServiceEmitter
 {
     private const NS_REQUESTS = 'Asaas\\Laravel\\Http\\Requests\\';
+
     private const NS_MODELS = 'Asaas\\Laravel\\Models\\';
+
     private const DOCS_URL = 'https://docs.asaas.com/reference/';
+
     private const PDF_ACCEPT = 'application/pdf, application/json';
 
-    public function __construct(private Plan $plan)
-    {
-    }
+    public function __construct(private Plan $plan) {}
 
     /** @param list<string> $services @return array<string, string> */
     public function emit(array $services): array
@@ -21,6 +24,7 @@ final class ServiceEmitter
         foreach ($services as $service) {
             $files["src/Services/$service.php"] = $this->service($service, $this->plan->services[$service]);
         }
+
         return $files;
     }
 
@@ -35,14 +39,14 @@ final class ServiceEmitter
         foreach ($indexes as $i) {
             $entry = $this->plan->entries[$i];
             if ($entry['requestClass'] !== null) {
-                $imports[] = self::NS_REQUESTS . $entry['requestClass'];
+                $imports[] = self::NS_REQUESTS.$entry['requestClass'];
                 $imports[] = 'Illuminate\\Validation\\ValidationException';
             }
             if (! in_array($entry['responseModel'], ['string', 'void'], true)) {
-                $imports[] = self::NS_MODELS . $entry['responseModel'];
+                $imports[] = self::NS_MODELS.$entry['responseModel'];
             }
             if ($entry['barePagination']) {
-                $imports[] = self::NS_REQUESTS . Plan::PAGINATION_CLASS;
+                $imports[] = self::NS_REQUESTS.Plan::PAGINATION_CLASS;
                 $imports[] = 'Illuminate\\Validation\\ValidationException';
             }
             $methods[] = $this->method($entry);
@@ -62,6 +66,7 @@ final class ServiceEmitter
         $lines[] = '{';
         $lines[] = implode("\n\n", $methods);
         $lines[] = '}';
+
         return Php::file($lines);
     }
 
@@ -70,7 +75,7 @@ final class ServiceEmitter
     {
         $short = array_map([Php::class, 'shortName'], $imports);
         if (count($short) !== count(array_unique($short))) {
-            throw new \RuntimeException("Short class name clash in $service: " . implode(', ', $imports));
+            throw new \RuntimeException("Short class name clash in $service: ".implode(', ', $imports));
         }
     }
 
@@ -81,7 +86,7 @@ final class ServiceEmitter
         $hasParams = $entry['hasParams'];
 
         $args = array_map(fn ($name) => "string \$$name", $entry['pathParams']);
-        $docs = ['@see ' . self::DOCS_URL . $entry['docSlug']];
+        $docs = ['@see '.self::DOCS_URL.$entry['docSlug']];
         if (isset($entry['docblockNote'])) {
             array_unshift($docs, $entry['docblockNote'], '');
         }
@@ -98,14 +103,15 @@ final class ServiceEmitter
         $model = $entry['responseModel'];
         $lines = ['    /**'];
         foreach ($docs as $doc) {
-            $lines[] = rtrim('     * ' . $doc);
+            $lines[] = rtrim('     * '.$doc);
         }
         $lines[] = '     */';
-        $lines[] = "    public function {$entry['sdkMethod']}(" . implode(', ', $args) . "): $model";
+        $lines[] = "    public function {$entry['sdkMethod']}(".implode(', ', $args)."): $model";
         $lines[] = '    {';
         array_push($lines, ...$this->builder($entry, $class, $hasParams));
         array_push($lines, ...$this->tail($entry, $model));
         $lines[] = '    }';
+
         return implode("\n", $lines);
     }
 
@@ -129,15 +135,16 @@ final class ServiceEmitter
             $chain[] = "->$setter($class::validate(\$data))";
         }
         if ($entry['responseModel'] === 'string') {
-            $chain[] = "->setHeader('Accept', '" . self::PDF_ACCEPT . "')";
+            $chain[] = "->setHeader('Accept', '".self::PDF_ACCEPT."')";
         }
         if ($chain === []) {
             return [...$lines, "        \$builder = $new;"];
         }
         $lines[] = "        \$builder = ($new)";
         foreach ($chain as $n => $call) {
-            $lines[] = '            ' . $call . ($n === array_key_last($chain) ? ';' : '');
+            $lines[] = '            '.$call.($n === array_key_last($chain) ? ';' : '');
         }
+
         return $lines;
     }
 

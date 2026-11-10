@@ -1,20 +1,32 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Asaas\Laravel\Config;
 
-final class ApiKeyAuthConfig
+final readonly class ApiKeyAuthConfig
 {
     public function __construct(
-        public readonly string $apiKey,
-        public readonly string $apiKeyHeader = 'access_token',
-    ) {
-    }
+        #[\SensitiveParameter]
+        public string $apiKey,
+        public string $apiKeyHeader = 'access_token',
+    ) {}
 
-    public static function fromArray(array $config): self
+    /** @param array<string, mixed> $config */
+    public static function fromArray(#[\SensitiveParameter] array $config): self
     {
         return new self(
-            apiKey: $config['api_key'] ?? '',
-            apiKeyHeader: $config['api_key_header'] ?? 'access_token',
+            apiKey: (string) ($config['api_key'] ?? ''),
+            apiKeyHeader: (string) ($config['api_key_header'] ?? 'access_token'),
         );
+    }
+
+    /** Keeps the key out of dd(), var_dump() and print_r() output. */
+    public function __debugInfo(): array
+    {
+        return [
+            'apiKey' => $this->apiKey === '' ? '' : '***',
+            'apiKeyHeader' => $this->apiKeyHeader,
+        ];
     }
 }

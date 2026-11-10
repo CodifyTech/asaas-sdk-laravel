@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Asaas\Laravel\Tests\Services;
 
 use Asaas\Laravel\AsaasServiceProvider;
@@ -13,9 +15,10 @@ use Orchestra\Testbench\TestCase;
 abstract class ServiceTestCase extends TestCase
 {
     protected const BASE_URL = 'https://api-sandbox.asaas.com';
+
     protected const PDF_ACCEPT = 'application/pdf, application/json';
 
-    // Untyped $app on purpose: Testbench 7 through 11 declare these hooks without a parameter type.
+    // Untyped $app on purpose: Testbench 9 through 11 declare these hooks without a parameter type.
     protected function getPackageProviders($app)
     {
         return [AsaasServiceProvider::class];
@@ -39,17 +42,17 @@ abstract class ServiceTestCase extends TestCase
     /**
      * Asserts exactly one request with this method, path (already encoded), query and, when given, JSON body.
      *
-     * @param array<string, mixed> $query
-     * @param array<string, mixed>|null $body
+     * @param  array<string, mixed>  $query
+     * @param  array<string, mixed>|null  $body
      */
     protected function assertRequestSent(string $method, string $path, array $query = [], ?array $body = null, string $accept = 'application/json'): void
     {
         Http::assertSentCount(1);
         Http::assertSent(fn (Request $request) => $request->method() === $method
-            && $this->urlWithoutQuery($request) === self::BASE_URL . $path
+            && $this->urlWithoutQuery($request) === self::BASE_URL.$path
             && $this->decodeQuery($request) === $this->normalizeQuery($query)
             && $request->hasHeader('Accept', $accept)
-            // Decode the raw body: Laravel 9.7 Request::data() parses JSON bodies as form data.
+            // Compare the raw JSON body: it is exactly what the SDK put on the wire.
             && ($body === null || json_decode($request->body(), true) == $body));
     }
 
@@ -63,7 +66,7 @@ abstract class ServiceTestCase extends TestCase
             sort($names);
 
             return $request->method() === 'POST'
-                && $this->urlWithoutQuery($request) === self::BASE_URL . $path
+                && $this->urlWithoutQuery($request) === self::BASE_URL.$path
                 && $request->isMultipart()
                 && $names === $partNames;
         });

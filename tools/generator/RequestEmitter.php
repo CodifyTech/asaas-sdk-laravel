@@ -1,13 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AsaasTools;
 
 /** Emits src/Http/Requests/<Dir>/<Name>.php: one class per unique input, rules() only. */
 final class RequestEmitter
 {
-    public function __construct(private Plan $plan)
-    {
-    }
+    public function __construct(private Plan $plan) {}
 
     /** @param list<string> $services only classes used by these services @return array<string, string> */
     public function emit(array $services): array
@@ -25,15 +25,17 @@ final class RequestEmitter
         }
         foreach ($this->plan->classes as $class => $info) {
             if (isset($wanted[$class])) {
-                $files['src/Http/Requests/' . str_replace('\\', '/', $class) . '.php'] = $this->render($class, $info);
+                $files['src/Http/Requests/'.str_replace('\\', '/', $class).'.php'] = $this->render($class, $info);
             }
         }
+
         return $files;
     }
 
     private function pagination(): string
     {
         $fields = $this->plan->paginationFields();
+
         return Php::file([
             ...Php::phpHeader(),
             'namespace Asaas\\Laravel\\Http\\Requests\\Common;',
@@ -75,6 +77,7 @@ final class RequestEmitter
         $lines[] = '        ];';
         $lines[] = '    }';
         $lines[] = '}';
+
         return Php::file($lines);
     }
 }

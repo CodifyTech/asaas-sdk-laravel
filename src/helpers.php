@@ -1,11 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
+use Asaas\Laravel\AsaasSdk;
+
 if (! function_exists('asaas')) {
     /**
      * Retorna a instância do SDK Asaas (quando usado em app Laravel).
      */
-    function asaas(): \Asaas\Laravel\AsaasSdk
+    function asaas(): AsaasSdk
     {
-        return app(\Asaas\Laravel\AsaasSdk::class);
+        return app(AsaasSdk::class);
     }
 }

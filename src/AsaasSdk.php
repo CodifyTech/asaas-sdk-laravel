@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Asaas\Laravel;
 
 use Asaas\Laravel\Config\AsaasSdkConfig;
@@ -42,38 +44,71 @@ use Asaas\Laravel\Services\WebhookService;
 final class AsaasSdk
 {
     public readonly PaymentService $payment;
+
     public readonly SandboxActionsService $sandboxActions;
+
     public readonly PaymentWithSummaryDataService $paymentWithSummaryData;
+
     public readonly CreditCardService $creditCard;
+
     public readonly PaymentRefundService $paymentRefund;
+
     public readonly PaymentSplitService $paymentSplit;
+
     public readonly EscrowAccountService $escrowAccount;
+
     public readonly PaymentDocumentService $paymentDocument;
+
     public readonly CustomerService $customer;
+
     public readonly NotificationService $notification;
+
     public readonly InstallmentService $installment;
+
     public readonly SubscriptionService $subscription;
+
     public readonly PixService $pix;
+
     public readonly PixTransactionService $pixTransaction;
+
     public readonly AnticipationService $anticipation;
+
     public readonly RecurringPixService $recurringPix;
+
     public readonly PaymentLinkService $paymentLink;
+
     public readonly CheckoutService $checkout;
+
     public readonly TransferService $transfer;
+
     public readonly PaymentDunningService $paymentDunning;
+
     public readonly BillService $bill;
+
     public readonly MobilePhoneRechargeService $mobilePhoneRecharge;
+
     public readonly CreditBureauReportService $creditBureauReport;
+
     public readonly FinancialTransactionService $financialTransaction;
+
     public readonly FinanceService $finance;
+
     public readonly AccountInfoService $accountInfo;
+
     public readonly InvoiceService $invoice;
+
     public readonly FiscalInfoService $fiscalInfo;
+
     public readonly WebhookService $webhook;
+
     public readonly SubaccountService $subaccount;
+
     public readonly AccountDocumentService $accountDocument;
+
     public readonly ChargebackService $chargeback;
+
     public readonly PixAutomaticService $pixAutomatic;
+
     public readonly ReceivableRegistrationService $receivableRegistration;
 
     public function __construct(
@@ -118,7 +153,12 @@ final class AsaasSdk
         $this->receivableRegistration = new ReceivableRegistrationService($client, $config);
     }
 
-    public static function fromConfig(array $config): self
+    /**
+     * @param  array<string, mixed>  $config  the `asaas` config array
+     *
+     * @throws \InvalidArgumentException on an invalid environment, base URL, timeout or retry setting
+     */
+    public static function fromConfig(#[\SensitiveParameter] array $config): self
     {
         return new self(AsaasSdkConfig::fromArray($config));
     }
