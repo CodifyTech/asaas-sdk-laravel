@@ -1,2 +1,3 @@
 /vendor
-/plans.phpunit.result.cache
+/plans
+.phpunit.result.cache
