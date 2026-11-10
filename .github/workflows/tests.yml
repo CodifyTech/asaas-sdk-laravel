@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
       - uses: shivammathur/setup-php@v2
@@ -65,7 +65,7 @@ jobs:
       # otherwise refuse the ones with published advisories. Users always resolve to patched releases.
       COMPOSER_NO_SECURITY_BLOCKING: ${{ matrix.stability == 'prefer-lowest' && '1' || '0' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
       - uses: shivammathur/setup-php@v2
