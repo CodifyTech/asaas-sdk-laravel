@@ -36,9 +36,7 @@ Serviço que encapsula o recurso **Assinaturas** da API Asaas. Permite listar.
 ### Exemplo (Laravel)
 
 ```php
-use Asaas\Laravel\Services\SubscriptionService;
-
-$service = app(SubscriptionService::class);
+$service = asaas()->subscription;
 $list = $service->list(['limit' => 10]);
 ```
 

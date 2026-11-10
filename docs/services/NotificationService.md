@@ -10,6 +10,11 @@ Serviço que encapsula o recurso **Notificações** da API Asaas. Permite listar
 
 - **API Asaas:** `v3/notifications`
 
+> **Atenção:** o caminho `GET v3/notifications` chamado por este serviço não consta na referência oficial da API Asaas (verificada em 2026-11-10). Não há garantia de que `list()` funcione; a API pode responder com erro HTTP (por exemplo 404, lançado como `ApiError`). Não há listagem oficial para este recurso; os endpoints existentes na referência são:
+> - `GET v3/customers/{id}/notifications`
+> - `PUT v3/notifications/{id}`
+> - `PUT v3/notifications/batch`
+
 ---
 
 ## Laravel (asaas-api-sdk-laravel)
@@ -36,9 +41,7 @@ Serviço que encapsula o recurso **Notificações** da API Asaas. Permite listar
 ### Exemplo (Laravel)
 
 ```php
-use Asaas\Laravel\Services\NotificationService;
-
-$service = app(NotificationService::class);
+$service = asaas()->notification;
 $list = $service->list(['limit' => 10]);
 ```
 

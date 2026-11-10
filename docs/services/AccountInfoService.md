@@ -10,6 +10,13 @@ Serviço que encapsula o recurso **Informações da conta** (myAccount) da API A
 
 - **API Asaas:** `v3/myAccount`
 
+> **Atenção:** o caminho `GET v3/myAccount` chamado por este serviço não consta na referência oficial da API Asaas (verificada em 2026-11-10). Não há garantia de que `list()` funcione; a API pode responder com erro HTTP (por exemplo 404, lançado como `ApiError`). Endpoints oficiais do recurso, ainda não implementados neste SDK:
+> - `GET v3/myAccount/commercialInfo/`
+> - `GET v3/myAccount/status/`
+> - `GET v3/myAccount/accountNumber`
+> - `GET v3/myAccount/fees/`
+> - `GET v3/wallets/`
+
 ---
 
 ## Laravel (asaas-api-sdk-laravel)
@@ -36,9 +43,7 @@ Serviço que encapsula o recurso **Informações da conta** (myAccount) da API A
 ### Exemplo (Laravel)
 
 ```php
-use Asaas\Laravel\Services\AccountInfoService;
-
-$service = app(AccountInfoService::class);
+$service = asaas()->accountInfo;
 $list = $service->list(['limit' => 10]);
 ```
 

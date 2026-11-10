@@ -10,6 +10,9 @@ Serviço que encapsula o recurso **Pagamentos com dados resumidos** da API Asaas
 
 - **API Asaas:** `v3/payments/summary`
 
+> **Atenção:** o caminho `GET v3/payments/summary` chamado por este serviço não consta na referência oficial da API Asaas (verificada em 2026-11-10). Não há garantia de que `list()` funcione; a API pode responder com erro HTTP (por exemplo 404, lançado como `ApiError`). Endpoints oficiais do recurso, ainda não implementados neste SDK:
+> - `GET v3/lean/payments`
+
 ---
 
 ## Laravel (asaas-api-sdk-laravel)
@@ -36,9 +39,7 @@ Serviço que encapsula o recurso **Pagamentos com dados resumidos** da API Asaas
 ### Exemplo (Laravel)
 
 ```php
-use Asaas\Laravel\Services\PaymentWithSummaryDataService;
-
-$service = app(PaymentWithSummaryDataService::class);
+$service = asaas()->paymentWithSummaryData;
 $list = $service->list(['limit' => 10]);
 ```
 

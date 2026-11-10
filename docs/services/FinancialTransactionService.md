@@ -36,9 +36,7 @@ Serviço que encapsula o recurso **Transações financeiras** da API Asaas. Perm
 ### Exemplo (Laravel)
 
 ```php
-use Asaas\Laravel\Services\FinancialTransactionService;
-
-$service = app(FinancialTransactionService::class);
+$service = asaas()->financialTransaction;
 $list = $service->list(['limit' => 10, 'offset' => 0]);
 ```
 

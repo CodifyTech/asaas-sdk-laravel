@@ -36,9 +36,7 @@ Serviço que encapsula o recurso **Parcelamentos** (installments) da API Asaas. 
 ### Exemplo (Laravel)
 
 ```php
-use Asaas\Laravel\Services\InstallmentService;
-
-$service = app(InstallmentService::class);
+$service = asaas()->installment;
 $list = $service->list(['limit' => 10]);
 ```
 

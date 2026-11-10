@@ -36,9 +36,7 @@ Serviço que encapsula o recurso **Documentos da conta** da API Asaas. Permite l
 ### Exemplo (Laravel)
 
 ```php
-use Asaas\Laravel\Services\AccountDocumentService;
-
-$service = app(AccountDocumentService::class);
+$service = asaas()->accountDocument;
 $list = $service->list(['limit' => 10, 'offset' => 0]);
 ```
 

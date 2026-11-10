@@ -10,6 +10,9 @@ Serviço que encapsula o recurso **Reembolsos** de pagamentos da API Asaas. Perm
 
 - **API Asaas:** `v3/payments/refunds`
 
+> **Atenção:** o caminho `GET v3/payments/refunds` chamado por este serviço não consta na referência oficial da API Asaas (verificada em 2026-11-10). Não há garantia de que `list()` funcione; a API pode responder com erro HTTP (por exemplo 404, lançado como `ApiError`). Endpoints oficiais do recurso, ainda não implementados neste SDK:
+> - `GET v3/payments/{id}/refunds`
+
 ---
 
 ## Laravel (asaas-api-sdk-laravel)
@@ -36,9 +39,7 @@ Serviço que encapsula o recurso **Reembolsos** de pagamentos da API Asaas. Perm
 ### Exemplo (Laravel)
 
 ```php
-use Asaas\Laravel\Services\PaymentRefundService;
-
-$service = app(PaymentRefundService::class);
+$service = asaas()->paymentRefund;
 $list = $service->list(['limit' => 10]);
 ```
 

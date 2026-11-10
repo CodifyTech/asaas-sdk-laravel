@@ -36,9 +36,7 @@ Serviço que encapsula o recurso **Relatórios de bureau de crédito** da API As
 ### Exemplo (Laravel)
 
 ```php
-use Asaas\Laravel\Services\CreditBureauReportService;
-
-$service = app(CreditBureauReportService::class);
+$service = asaas()->creditBureauReport;
 $list = $service->list(['limit' => 10]);
 ```
 

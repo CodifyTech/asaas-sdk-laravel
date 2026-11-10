@@ -52,9 +52,7 @@ Serviço que encapsula o recurso **Clientes** da API Asaas. Permite listar, cria
 ### Exemplo (Laravel)
 
 ```php
-use Asaas\Laravel\Services\CustomerService;
-
-$customerService = app(CustomerService::class);
+$customerService = asaas()->customer;
 
 // list
 $list = $customerService->list(['limit' => 10, 'offset' => 0, 'email' => 'cliente@example.com']);

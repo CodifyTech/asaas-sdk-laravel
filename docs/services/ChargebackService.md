@@ -36,9 +36,7 @@ Serviço que encapsula o recurso **Chargebacks** da API Asaas. Permite listar ch
 ### Exemplo (Laravel)
 
 ```php
-use Asaas\Laravel\Services\ChargebackService;
-
-$service = app(ChargebackService::class);
+$service = asaas()->chargeback;
 $list = $service->list(['limit' => 10]);
 ```
 

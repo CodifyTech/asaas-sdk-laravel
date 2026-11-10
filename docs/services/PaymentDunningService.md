@@ -36,9 +36,7 @@ Serviço que encapsula o recurso **Inadimplência** (payment dunning) da API Asa
 ### Exemplo (Laravel)
 
 ```php
-use Asaas\Laravel\Services\PaymentDunningService;
-
-$service = app(PaymentDunningService::class);
+$service = asaas()->paymentDunning;
 $list = $service->list(['limit' => 10]);
 ```
 

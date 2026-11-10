@@ -3,7 +3,7 @@
     "description": "SDK Laravel para a API Asaas v3 - cliente HTTP com retry, serviços, Models e Form Requests",
     "type": "library",
     "license": "MIT",
-    "version": "1.0.2",
+    "version": "1.1.0",
     "authors": [
         {
             "name": "WDT",
@@ -11,14 +11,15 @@
         }
     ],
     "require": {
-        "php": "^8.2",
-        "illuminate/http": "^11.0|^12.0",
-        "illuminate/support": "^11.0|^12.0",
-        "illuminate/validation": "^11.0|^12.0"
+        "php": "^8.1",
+        "guzzlehttp/guzzle": "^7.2",
+        "illuminate/http": "^9.7|^10.0|^11.0|^12.0|^13.0",
+        "illuminate/support": "^9.7|^10.0|^11.0|^12.0|^13.0",
+        "illuminate/validation": "^9.7|^10.0|^11.0|^12.0|^13.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^11.0",
-        "orchestra/testbench": "^9.0|^10.0"
+        "phpunit/phpunit": "^9.5|^10.0|^11.0|^12.0|^13.0",
+        "orchestra/testbench": "^7.0|^8.0|^9.0|^10.0|^11.0"
     },
     "autoload": {
         "psr-4": {

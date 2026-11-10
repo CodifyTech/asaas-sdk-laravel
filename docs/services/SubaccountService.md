@@ -36,9 +36,7 @@ Serviço que encapsula o recurso **Subcontas** (accounts) da API Asaas. Permite 
 ### Exemplo (Laravel)
 
 ```php
-use Asaas\Laravel\Services\SubaccountService;
-
-$service = app(SubaccountService::class);
+$service = asaas()->subaccount;
 $list = $service->list(['limit' => 10]);
 ```
 

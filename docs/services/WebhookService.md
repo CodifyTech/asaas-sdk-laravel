@@ -36,9 +36,7 @@ Serviço que encapsula o recurso **Webhooks** da API Asaas. Permite listar.
 ### Exemplo (Laravel)
 
 ```php
-use Asaas\Laravel\Services\WebhookService;
-
-$service = app(WebhookService::class);
+$service = asaas()->webhook;
 $list = $service->list(['limit' => 10]);
 ```
 

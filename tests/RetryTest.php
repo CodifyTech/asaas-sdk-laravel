@@ -1,0 +1,51 @@
+<?php
+
+namespace Asaas\Laravel\Tests;
+
+use Asaas\Laravel\AsaasServiceProvider;
+use Illuminate\Support\Facades\Http;
+use Orchestra\Testbench\TestCase;
+
+// Guards the illuminate ^9.7 floor in composer.json: the retry-when callback fails on Laravel 9.6.
+class RetryTest extends TestCase
+{
+    // Untyped $app on purpose: Testbench 7 through 11 declare these hooks without a parameter type.
+    protected function getPackageProviders($app)
+    {
+        return [AsaasServiceProvider::class];
+    }
+
+    protected function getEnvironmentSetUp($app)
+    {
+        $app['config']->set('asaas', [
+            'api_key' => 'k',
+            'environment' => 'production',
+            'retry' => ['max_retries' => 3, 'initial_delay' => 1],
+        ]);
+    }
+
+    public function test_retries_retryable_status_then_succeeds(): void
+    {
+        Http::fake(['*' => Http::sequence()
+            ->push(['errors' => []], 503)
+            ->push(['data' => [], 'totalCount' => 0, 'hasMore' => false], 200)]);
+
+        asaas()->customer->list();
+
+        Http::assertSentCount(2);
+    }
+
+    public function test_does_not_retry_non_retryable_status(): void
+    {
+        Http::fake(['*' => Http::response(['errors' => [['code' => 'x', 'description' => 'y']]], 400)]);
+
+        try {
+            asaas()->customer->list();
+            $this->fail('Expected ErrorResponseDtoException for HTTP 400.');
+        } catch (\Asaas\Laravel\Exceptions\ErrorResponseDtoException $e) {
+            $this->assertSame(400, $e->statusCode);
+        }
+
+        Http::assertSentCount(1);
+    }
+}

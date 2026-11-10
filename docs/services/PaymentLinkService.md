@@ -36,9 +36,7 @@ Serviço que encapsula o recurso **Links de pagamento** da API Asaas. Permite li
 ### Exemplo (Laravel)
 
 ```php
-use Asaas\Laravel\Services\PaymentLinkService;
-
-$service = app(PaymentLinkService::class);
+$service = asaas()->paymentLink;
 $list = $service->list(['limit' => 10]);
 ```
 

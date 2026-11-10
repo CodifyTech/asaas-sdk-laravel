@@ -44,9 +44,7 @@ Serviço que encapsula o recurso **Cobranças (Payments)** da API Asaas. Permite
 ### Exemplo (Laravel)
 
 ```php
-use Asaas\Laravel\Services\PaymentService;
-
-$paymentService = app(PaymentService::class);
+$paymentService = asaas()->payment;
 
 // list
 $list = $paymentService->list(['limit' => 10, 'offset' => 0, 'customer' => 'cus_xxx']);

@@ -36,9 +36,7 @@ Serviço que encapsula o recurso **Notas fiscais / Faturas** (invoices) da API A
 ### Exemplo (Laravel)
 
 ```php
-use Asaas\Laravel\Services\InvoiceService;
-
-$service = app(InvoiceService::class);
+$service = asaas()->invoice;
 $list = $service->list(['limit' => 10]);
 ```
 

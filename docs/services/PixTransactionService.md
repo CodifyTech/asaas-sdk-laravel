@@ -36,9 +36,7 @@ Serviço que encapsula o recurso **Transações PIX** da API Asaas. Permite list
 ### Exemplo (Laravel)
 
 ```php
-use Asaas\Laravel\Services\PixTransactionService;
-
-$service = app(PixTransactionService::class);
+$service = asaas()->pixTransaction;
 $list = $service->list(['limit' => 10]);
 ```
 

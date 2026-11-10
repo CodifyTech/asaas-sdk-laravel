@@ -2,7 +2,7 @@
 
 Documentação em Markdown de todos os serviços do SDK **asaas-api-sdk-laravel** (PHP/Laravel). Cada serviço possui um documento com propósito, endpoint base, métodos, parâmetros, exemplos e referência à API Asaas.
 
-**Total:** 33 serviços.
+**Total:** 32 serviços, mais o `BaseService` (contrato interno).
 
 ---
 

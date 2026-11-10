@@ -10,6 +10,9 @@ Serviço que encapsula o recurso **PIX** da API Asaas. Permite listar.
 
 - **API Asaas:** `v3/pix`
 
+> **Atenção:** o caminho `GET v3/pix` chamado por este serviço não consta na referência oficial da API Asaas (verificada em 2026-11-10). Não há garantia de que `list()` funcione; a API pode responder com erro HTTP (por exemplo 404, lançado como `ApiError`). Endpoints oficiais do recurso, ainda não implementados neste SDK:
+> - `GET v3/pix/addressKeys`
+
 ---
 
 ## Laravel (asaas-api-sdk-laravel)
@@ -36,9 +39,7 @@ Serviço que encapsula o recurso **PIX** da API Asaas. Permite listar.
 ### Exemplo (Laravel)
 
 ```php
-use Asaas\Laravel\Services\PixService;
-
-$service = app(PixService::class);
+$service = asaas()->pix;
 $list = $service->list(['limit' => 10]);
 ```
 

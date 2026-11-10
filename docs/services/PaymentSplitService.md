@@ -10,6 +10,10 @@ Serviço que encapsula o recurso **Split de pagamentos** da API Asaas. Permite l
 
 - **API Asaas:** `v3/paymentSplits`
 
+> **Atenção:** o caminho `GET v3/paymentSplits` chamado por este serviço não consta na referência oficial da API Asaas (verificada em 2026-11-10). Não há garantia de que `list()` funcione; a API pode responder com erro HTTP (por exemplo 404, lançado como `ApiError`). Endpoints oficiais do recurso, ainda não implementados neste SDK:
+> - `GET v3/payments/splits/paid`
+> - `GET v3/payments/splits/received`
+
 ---
 
 ## Laravel (asaas-api-sdk-laravel)
@@ -36,9 +40,7 @@ Serviço que encapsula o recurso **Split de pagamentos** da API Asaas. Permite l
 ### Exemplo (Laravel)
 
 ```php
-use Asaas\Laravel\Services\PaymentSplitService;
-
-$service = app(PaymentSplitService::class);
+$service = asaas()->paymentSplit;
 $list = $service->list(['limit' => 10]);
 ```
 

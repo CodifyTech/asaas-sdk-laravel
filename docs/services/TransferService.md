@@ -36,9 +36,7 @@ Serviço que encapsula o recurso **Transferências** da API Asaas. Permite lista
 ### Exemplo (Laravel)
 
 ```php
-use Asaas\Laravel\Services\TransferService;
-
-$service = app(TransferService::class);
+$service = asaas()->transfer;
 $list = $service->list(['limit' => 10]);
 ```
 

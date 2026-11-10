@@ -36,9 +36,7 @@ Serviço que encapsula o recurso **Antecipações** da API Asaas. Permite listar
 ### Exemplo (Laravel)
 
 ```php
-use Asaas\Laravel\Services\AnticipationService;
-
-$service = app(AnticipationService::class);
+$service = asaas()->anticipation;
 $list = $service->list(['limit' => 10, 'offset' => 0]);
 ```
 

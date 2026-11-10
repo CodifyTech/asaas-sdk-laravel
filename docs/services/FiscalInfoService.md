@@ -36,9 +36,7 @@ Serviço que encapsula o recurso **Informações fiscais** da API Asaas. Permite
 ### Exemplo (Laravel)
 
 ```php
-use Asaas\Laravel\Services\FiscalInfoService;
-
-$service = app(FiscalInfoService::class);
+$service = asaas()->fiscalInfo;
 $list = $service->list(['limit' => 10]);
 ```
 

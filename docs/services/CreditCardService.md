@@ -10,6 +10,11 @@ Serviço que encapsula o recurso **Cartão de crédito** da API Asaas. Permite l
 
 - **API Asaas:** `v3/creditCard`
 
+> **Atenção:** o caminho `GET v3/creditCard` chamado por este serviço não consta na referência oficial da API Asaas (verificada em 2026-11-10). Não há garantia de que `list()` funcione; a API pode responder com erro HTTP (por exemplo 404, lançado como `ApiError`). Endpoints oficiais do recurso, ainda não implementados neste SDK:
+> - `POST v3/creditCard/tokenizeCreditCard`
+> - `GET v3/creditCard/preAuthorization/config`
+> - `POST v3/creditCard/preAuthorization/config`
+
 ---
 
 ## Laravel (asaas-api-sdk-laravel)
@@ -36,9 +41,7 @@ Serviço que encapsula o recurso **Cartão de crédito** da API Asaas. Permite l
 ### Exemplo (Laravel)
 
 ```php
-use Asaas\Laravel\Services\CreditCardService;
-
-$service = app(CreditCardService::class);
+$service = asaas()->creditCard;
 $list = $service->list(['limit' => 10]);
 ```
 

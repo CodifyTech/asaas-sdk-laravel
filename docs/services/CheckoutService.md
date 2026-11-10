@@ -10,6 +10,10 @@ Serviço que encapsula o recurso **Checkout** da API Asaas. Permite listar sess�
 
 - **API Asaas:** `v3/checkout`
 
+> **Atenção:** o caminho `GET v3/checkout` chamado por este serviço não consta na referência oficial da API Asaas (verificada em 2026-11-10). Não há garantia de que `list()` funcione; a API pode responder com erro HTTP (por exemplo 404, lançado como `ApiError`). Não há listagem oficial para este recurso; os endpoints existentes na referência são:
+> - `POST v3/checkouts`
+> - `POST v3/checkouts/{id}/cancel`
+
 ---
 
 ## Laravel (asaas-api-sdk-laravel)
@@ -36,9 +40,7 @@ Serviço que encapsula o recurso **Checkout** da API Asaas. Permite listar sess�
 ### Exemplo (Laravel)
 
 ```php
-use Asaas\Laravel\Services\CheckoutService;
-
-$service = app(CheckoutService::class);
+$service = asaas()->checkout;
 $list = $service->list(['limit' => 10]);
 ```
 

@@ -37,7 +37,7 @@ Classe base abstrata dos serviços do SDK. Centraliza a execução de requisiç�
 
 ```php
 // BaseService não é instanciado diretamente; os serviços herdam e usam execute/executeAndMap.
-$customerService = app(\Asaas\Laravel\Services\CustomerService::class);
+$customerService = asaas()->customer;
 $list = $customerService->list(['limit' => 10]); // internamente: buildRequest + executeAndMap(.., CustomerList::class)
 ```
 
