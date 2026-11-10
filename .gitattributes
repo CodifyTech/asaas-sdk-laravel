@@ -1,0 +1,5 @@
+/tools export-ignore
+/plans export-ignore
+/.github export-ignore
+/tests export-ignore
+/.claude export-ignore

@@ -28,8 +28,10 @@ use Asaas\Laravel\Services\PaymentRefundService;
 use Asaas\Laravel\Services\PaymentService;
 use Asaas\Laravel\Services\PaymentSplitService;
 use Asaas\Laravel\Services\PaymentWithSummaryDataService;
+use Asaas\Laravel\Services\PixAutomaticService;
 use Asaas\Laravel\Services\PixService;
 use Asaas\Laravel\Services\PixTransactionService;
+use Asaas\Laravel\Services\ReceivableRegistrationService;
 use Asaas\Laravel\Services\RecurringPixService;
 use Asaas\Laravel\Services\SandboxActionsService;
 use Asaas\Laravel\Services\SubaccountService;
@@ -71,6 +73,8 @@ final class AsaasSdk
     public readonly SubaccountService $subaccount;
     public readonly AccountDocumentService $accountDocument;
     public readonly ChargebackService $chargeback;
+    public readonly PixAutomaticService $pixAutomatic;
+    public readonly ReceivableRegistrationService $receivableRegistration;
 
     public function __construct(
         private readonly AsaasSdkConfig $config,
@@ -110,6 +114,8 @@ final class AsaasSdk
         $this->subaccount = new SubaccountService($client, $config);
         $this->accountDocument = new AccountDocumentService($client, $config);
         $this->chargeback = new ChargebackService($client, $config);
+        $this->pixAutomatic = new PixAutomaticService($client, $config);
+        $this->receivableRegistration = new ReceivableRegistrationService($client, $config);
     }
 
     public static function fromConfig(array $config): self

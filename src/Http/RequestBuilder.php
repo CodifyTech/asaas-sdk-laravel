@@ -15,6 +15,7 @@ final class RequestBuilder
     /** @var array<string, string> */
     private array $headers = [];
     private mixed $body = null;
+    private bool $multipart = false;
 
     public function __construct(
         string $path,
@@ -26,7 +27,7 @@ final class RequestBuilder
 
     public function setPathParameter(string $key, string|int $value): self
     {
-        $this->pathParams[$key] = (string) $value;
+        $this->pathParams[$key] = rawurlencode((string) $value);
         return $this;
     }
 
@@ -35,6 +36,15 @@ final class RequestBuilder
     {
         if ($value !== null) {
             $this->queryParams[$key] = $value;
+        }
+        return $this;
+    }
+
+    /** @param array<string, string|int|float|bool|null> $params */
+    public function setQueryParameters(array $params): self
+    {
+        foreach ($params as $key => $value) {
+            $this->setQueryParameter((string) $key, $value);
         }
         return $this;
     }
@@ -65,6 +75,14 @@ final class RequestBuilder
         return $this;
     }
 
+    /** @param array<string, mixed> $fields */
+    public function setMultipartContent(array $fields): self
+    {
+        $this->body = $fields;
+        $this->multipart = true;
+        return $this;
+    }
+
     public function buildUrl(): string
     {
         $path = $this->path;
@@ -72,12 +90,13 @@ final class RequestBuilder
             $path = str_replace('{' . $key . '}', $value, $path);
         }
         if ($this->queryParams !== []) {
-            $path .= '?' . http_build_query($this->queryParams, '', '&', PHP_QUERY_RFC3986);
+            $query = array_map(fn ($v) => is_bool($v) ? ($v ? 'true' : 'false') : $v, $this->queryParams);
+            $path .= '?' . http_build_query($query, '', '&', PHP_QUERY_RFC3986);
         }
         return $path;
     }
 
-    /** @return array{method: string, path: string, headers: array, body: mixed} */
+    /** @return array{method: string, path: string, headers: array, body: mixed, multipart: bool} */
     public function build(): array
     {
         return [
@@ -85,6 +104,7 @@ final class RequestBuilder
             'path' => $this->buildUrl(),
             'headers' => $this->headers,
             'body' => $this->body,
+            'multipart' => $this->multipart,
         ];
     }
 }

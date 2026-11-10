@@ -13,6 +13,6 @@ return [
         'backoff_factor' => (float) env('ASAAS_RETRY_BACKOFF_FACTOR', 2),
         'jitter' => (int) env('ASAAS_RETRY_JITTER', 150),
         'status_codes' => [408, 429, 500, 502, 503, 504],
-        'methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+        'methods' => ['GET', 'PUT', 'DELETE'],
     ],
 ];

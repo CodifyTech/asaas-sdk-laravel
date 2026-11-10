@@ -48,4 +48,18 @@ class RetryTest extends TestCase
 
         Http::assertSentCount(1);
     }
+
+    public function test_post_is_not_retried_by_default(): void
+    {
+        Http::fake(['*' => Http::response(['errors' => []], 503)]);
+
+        try {
+            asaas()->customer->create(['name' => 'N', 'cpfCnpj' => '12345678909']);
+            $this->fail('Expected ApiError for HTTP 503.');
+        } catch (\Asaas\Laravel\Exceptions\ApiError $e) {
+            $this->assertSame(503, $e->statusCode);
+        }
+
+        Http::assertSentCount(1);
+    }
 }

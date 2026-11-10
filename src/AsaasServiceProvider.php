@@ -8,6 +8,8 @@ class AsaasServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->mergeConfigFrom(__DIR__ . '/../config/asaas.php', 'asaas');
+
         $this->app->singleton(AsaasSdk::class, function ($app) {
             $config = $app['config']->get('asaas', []);
             return AsaasSdk::fromConfig($config);

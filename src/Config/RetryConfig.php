@@ -15,7 +15,7 @@ final class RetryConfig implements Arrayable
         /** @var int[] */
         public readonly array $statusCodesToRetry = [408, 429, 500, 502, 503, 504],
         /** @var string[] */
-        public readonly array $methodsToRetry = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+        public readonly array $methodsToRetry = ['GET', 'PUT', 'DELETE'],
     ) {
     }
 
@@ -28,7 +28,7 @@ final class RetryConfig implements Arrayable
             backoffFactor: (float) ($config['backoff_factor'] ?? 2),
             jitter: $config['jitter'] ?? 150,
             statusCodesToRetry: $config['status_codes'] ?? [408, 429, 500, 502, 503, 504],
-            methodsToRetry: $config['methods'] ?? ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+            methodsToRetry: $config['methods'] ?? ['GET', 'PUT', 'DELETE'],
         );
     }
 

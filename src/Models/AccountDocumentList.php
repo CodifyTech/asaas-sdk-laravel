@@ -12,6 +12,7 @@ final class AccountDocumentList implements Arrayable
         public readonly array $items = [],
         public readonly ?int $totalCount = null,
         public readonly ?bool $hasMore = null,
+        public readonly ?string $rejectReasons = null,
     ) {
     }
 
@@ -27,6 +28,7 @@ final class AccountDocumentList implements Arrayable
             items: $items,
             totalCount: isset($data['totalCount']) ? (int) $data['totalCount'] : null,
             hasMore: $data['hasMore'] ?? null,
+            rejectReasons: $data['rejectReasons'] ?? null,
         );
     }
 
@@ -36,6 +38,7 @@ final class AccountDocumentList implements Arrayable
             'data' => array_map(fn (AccountDocument $x) => $x->toArray(), $this->items),
             'totalCount' => $this->totalCount,
             'hasMore' => $this->hasMore,
+            'rejectReasons' => $this->rejectReasons,
         ];
     }
 }

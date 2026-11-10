@@ -12,8 +12,10 @@ use Illuminate\Http\Client\Response;
 
 abstract class BaseService
 {
-    /** @var array<int, array{model: string, exception: class-string}> */
-    protected array $errorMappings = [];
+    /** @var array<int, array{exception: class-string}> */
+    protected array $errorMappings = [
+        400 => ['exception' => ErrorResponseDtoException::class],
+    ];
 
     public function __construct(
         protected AsaasHttpClient $httpClient,
@@ -27,7 +29,7 @@ abstract class BaseService
     }
 
     /**
-     * @param array{method: string, path: string, headers: array, body: mixed} $request
+     * @param array{method: string, path: string, headers: array, body: mixed, multipart?: bool} $request
      * @throws ApiError|ErrorResponseDtoException
      */
     protected function execute(array $request): Response
@@ -37,6 +39,7 @@ abstract class BaseService
             $request['path'],
             $request['headers'] ?? [],
             $request['body'] ?? null,
+            $request['multipart'] ?? false,
         );
 
         if ($response->successful()) {
@@ -54,7 +57,7 @@ abstract class BaseService
     }
 
     /**
-     * @param array{method: string, path: string, headers: array, body: mixed} $request
+     * @param array{method: string, path: string, headers: array, body: mixed, multipart?: bool} $request
      * @param class-string $dtoClass
      * @return object
      */

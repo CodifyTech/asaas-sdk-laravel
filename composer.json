@@ -3,7 +3,7 @@
     "description": "SDK Laravel para a API Asaas v3 - cliente HTTP com retry, serviços, Models e Form Requests",
     "type": "library",
     "license": "MIT",
-    "version": "1.1.0",
+    "version": "2.0.0",
     "authors": [
         {
             "name": "WDT",
@@ -40,6 +40,10 @@
                 "Asaas\\Laravel\\AsaasServiceProvider"
             ]
         }
+    },
+    "scripts": {
+        "generate": "php tools/generator/generate.php",
+        "generate:check": "php tools/generator/generate.php --check --strict"
     },
     "config": {
         "sort-packages": true,
